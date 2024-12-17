@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+
+.container {
+  max-width: 400px;
+  margin: auto;
+  width: 100%;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  position: relative;
+}
+
+#check {
+  display: none;
+}
+
+.login,
+.registration {
+  padding: 3rem 2rem;
+  display: none;
+  transition: all 0.5s ease;
+}
+
+.active {
+  display: block !important;
+}
+
+.form header {
+  font-size: 2.2rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #1db954;
+}
+
+.form input {
+  height: 50px;
+  width: 100%;
+  margin-bottom: 1.2rem;
+  padding: 0 15px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  outline: none;
+  transition: border 0.3s ease;
+}
+
+.form input:focus {
+  border-color: #1db954;
+}
+
+.form a {
+  font-size: 14px;
+  color: #1db954;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.form .error {
+  color: red;
+  font-size: 14px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.form input.button {
+  background-color: #1db954;
+  color: #fff;
+  border: none;
+  padding: 15px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.form input.button:hover {
+  background-color: #159a3d;
+}
+
+.signup {
+  text-align: center;
+  font-size: 16px;
+  margin-top: 1.5rem;
+}
+
+.signup label {
+  color: #1db954;
+  cursor: pointer;
+}
+
+.signup label:hover {
+  text-decoration: underline;
+}
+/* Existing styles */
+.form select {
+  height: 50px;              /* Make the dropdown the same height as input fields */
+  width: 100%;               /* Full width */
+  margin-bottom: 1.2rem;     /* Add space below dropdown */
+  padding: 0 15px;           /* Add padding inside dropdown for better spacing */
+  font-size: 16px;           /* Match font size with input fields */
+  border: 2px solid #ddd;    /* Same border style as input fields */
+  border-radius: 10px;       /* Same rounded corners as input fields */
+  outline: none;             /* Remove the default outline */
+  transition: border 0.3s ease; /* Add smooth transition for border color */
+}
+
+.form select:focus {
+  border-color: #1db954; /* Highlight the border on focus */
+}
