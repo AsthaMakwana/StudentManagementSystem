@@ -1,15 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
-import '../../assets/LoginSignup.css';
-
+import '../../assets/client/LoginSignup.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../redux/authSlice';
-
-// import { AuthContext } from '../../context/AuthContext';
 import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
-
 
 const LoginSignup = () => {
 
@@ -18,19 +14,18 @@ const LoginSignup = () => {
   const [signupData, setSignupData] = useState({ username: '', email: '', password: '' });
   const [error, setError] = useState('');
 
- 
-  const dispatch = useDispatch();  
-  const token = useSelector(state => state.auth.token);
-
-  // const { token, login, user } = useContext(AuthContext);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const [isNavigated, setIsNavigated] = useState(false);
+
   useEffect(() => {
-   
-    if (token) {
+    const tokenFromStorage = localStorage.getItem('authToken');
+    if (tokenFromStorage && !isNavigated) {
       navigate('/');
+      setIsNavigated(true);
     }
-  }, []);
+  }, [isNavigated, navigate]);
 
   const handleLoginChange = (e) => {
     setLoginData({ ...loginData, [e.target.name]: e.target.value });
@@ -50,20 +45,17 @@ const LoginSignup = () => {
       });
 
       if (response.data.token) {
-
         dispatch(
           login({
             token: response.data.token,
             user: response.data.user,
           })
         );
-        // await login(response.data.token);
         setError('');
         toast.success('Login successful!');
         setTimeout(() => {
           navigate('/');
         }, 1000);
-
       }
     }
     catch (err) {
@@ -84,26 +76,25 @@ const LoginSignup = () => {
       });
 
       if (response.status === 201) {
+
         const loginResponse = await axios.post('http://localhost:3001/api/auth/login', {
           email: signupData.email,
           password: signupData.password,
         });
 
-
-          dispatch(
-            login({
-              token: loginResponse.data.token,
-              user: loginResponse.data.user,
-            })
-          );
-          // await login(loginResponse.data.token);
-          setError('');
-          toast.success('Signup successful!');
-          setTimeout(() => {
-            navigate('/');
-          }, 1000);
-        }
+        dispatch(
+          login({
+            token: loginResponse.data.token,
+            user: loginResponse.data.user,
+          })
+        );
+        setError('');
+        toast.success('Signup successful!');
+        setTimeout(() => {
+          navigate('/');
+        }, 1000);
       }
+    }
     catch (err) {
       setError('Signup failed. Please try again.');
     }
@@ -188,7 +179,7 @@ const LoginSignup = () => {
 
           <input type="submit" className="button" value="Signup" />
         </form>
-        
+
         <div className="signup">
           <span className="signup">
             Already have an account?

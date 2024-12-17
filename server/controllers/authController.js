@@ -6,7 +6,6 @@ require("dotenv").config();
 exports.signup = async (req, res) => {
 
     const { username, email, password, role } = req.body;
-    console.log(req.body);
 
     if (!username || !email || !password) {
         return res.status(400).json({ error: 'Please provide all required fields' });
@@ -43,14 +42,20 @@ exports.login = async (req, res) => {
         const user = await User.findOne({ email });
         if (!user) return res.status(400).json({ error: 'Invalid credentials' });
 
-        console.log('User found:', user);
-
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
         const token = jwt.sign({ id: user._id, username: user.username, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
-        console.log('///', token);
-        res.json({ token });
+        
+        res.json({
+            token,
+            user: {
+              id: user._id,
+              username: user.username,
+              email: user.email,
+              role: user.role
+            }
+          });
     }
     catch (error) {
         console.log('Error during login:', error);

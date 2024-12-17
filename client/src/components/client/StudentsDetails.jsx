@@ -1,38 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-
 import { useDispatch, useSelector } from 'react-redux';
 import { setStudents } from '../../redux/studentSlice';
-
 import Navbar from './Navbar';
+import '../../assets/client/StudentsDetails.css';
 
 function StudentsDetails() {
 
     const { id } = useParams();
-
     const dispatch = useDispatch();
-
-    // const [student, setStudent] = useState(null);
     const student = useSelector(state =>
-        state.studentReducer.students.find(student => student._id === id)
+        state.students.students.find(student => student._id === id)
     );
 
-    // useEffect(() => {
-    //     const token = localStorage.getItem('authToken');
-    //     axios.get(`http://localhost:3001/students/getStudent/${id}`, {
-    //         headers: {
-    //             'Authorization': `Bearer ${token}`,
-    //         }
-    //     })
-    //         .then(result => {
-    //             setStudent(result.data);
-    //         })
-    //         .catch(err => console.log(err));
-    // }, [id]);
     useEffect(() => {
         if (!student) {
-            // If student is not found in Redux, fetch it from the server
             const token = localStorage.getItem('authToken');
             axios.get(`http://localhost:3001/students/getStudent/${id}`, {
                 headers: {
@@ -40,7 +23,7 @@ function StudentsDetails() {
                 }
             })
                 .then(result => {
-                    dispatch(setStudents([result.data])); // Dispatch the fetched student data to Redux
+                    dispatch(setStudents([result.data]));
                 })
                 .catch(err => console.log(err));
         }
@@ -76,24 +59,6 @@ function StudentsDetails() {
                         </div>
                     </div>
                 </div>
-
-                <style>
-                    {`
-                        .d-flex::before {
-                            content: "";
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background-image: url("https://www.oxfordlearning.com/wp-content/uploads/2018/09/how-to-help-your-child-focus-in-school-860x420.jpeg");
-                            background-size: cover;
-                            background-repeat: no-repeat;
-                            opacity: 0.5; /* Set the opacity for the background image */
-                            z-index: -1; /* Keeps the image behind the content */
-                        }
-                    `}
-                </style>
             </div>
         </div>
     );

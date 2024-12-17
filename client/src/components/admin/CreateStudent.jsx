@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-
 import { useDispatch } from 'react-redux';
 import { addStudent } from '../../redux/studentSlice';
-
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import Joi from 'joi';
 import Navbar from '../client/Navbar';
+import '../../assets/admin/CreateStudent.css';
 
 function CreateStudent() {
 
@@ -43,6 +42,7 @@ function CreateStudent() {
         }
         return age;
     }
+
     useEffect(() => {
         if (birthdate) {
             setAge(calculateAge(birthdate));
@@ -102,11 +102,10 @@ function CreateStudent() {
                             'Authorization': `Bearer ${token}`,
                         }
                     })
-                    .then(result => {
-                        // Dispatch the action to add the student to Redux
-                        dispatch(addStudent(result.data)); // result.data should be the new student object
-                        navigate("/");
-                    })
+                        .then(result => {
+                            dispatch(addStudent(result.data));
+                            navigate("/");
+                        })
                         .catch(err => {
                             console.log(err);
                         });
@@ -179,24 +178,6 @@ function CreateStudent() {
 
                     </form>
                 </div>
-
-                <style>
-                    {`
-                    .d-flex::before {
-                        content: "";
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-image: url("https://www.oxfordlearning.com/wp-content/uploads/2018/09/how-to-help-your-child-focus-in-school-860x420.jpeg");
-                        background-size: cover;
-                        background-repeat: no-repeat;
-                        opacity: 0.5; /* Set the opacity for the background image */
-                        z-index: -1; /* Keeps the image behind the content */
-                    }
-                   `}
-                </style>
             </div>
         </div>
     );

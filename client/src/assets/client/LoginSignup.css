@@ -96,19 +96,19 @@
 .signup label:hover {
   text-decoration: underline;
 }
-/* Existing styles */
+
 .form select {
-  height: 50px;              /* Make the dropdown the same height as input fields */
-  width: 100%;               /* Full width */
-  margin-bottom: 1.2rem;     /* Add space below dropdown */
-  padding: 0 15px;           /* Add padding inside dropdown for better spacing */
-  font-size: 16px;           /* Match font size with input fields */
-  border: 2px solid #ddd;    /* Same border style as input fields */
-  border-radius: 10px;       /* Same rounded corners as input fields */
-  outline: none;             /* Remove the default outline */
-  transition: border 0.3s ease; /* Add smooth transition for border color */
+  height: 50px;              
+  width: 100%;               
+  margin-bottom: 1.2rem;     
+  padding: 0 15px;           
+  font-size: 16px;           
+  border: 2px solid #ddd;   
+  border-radius: 10px;      
+  outline: none;            
+  transition: border 0.3s ease; 
 }
 
 .form select:focus {
-  border-color: #1db954; /* Highlight the border on focus */
+  border-color: #1db954;
 }

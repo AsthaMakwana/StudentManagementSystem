@@ -1,30 +1,26 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { AuthContext } from '../../context/AuthContext';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { FiInfo } from 'react-icons/fi';
 import Navbar from './Navbar';
-
 import { useDispatch, useSelector } from 'react-redux';
 import { setStudents, deleteStudent } from '../../redux/studentSlice';
+import '../../assets/client/Students.css';
 
 function Students() {
 
-    // const [students, setStudents] = useState([
-    //     { Name: "Astha", Email: "astha@gmail.com", Age: 21 }
-    // ]);
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [studentsPerPage] = useState(5);
 
     const students = useSelector(state => state.students.students);
-    console.log('dcddfedf',students)
+    const user = useSelector(state => state.auth.user);
+    console.log('students',user);
     const dispatch = useDispatch();
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
-        console.log(token);
         axios.get("http://localhost:3001/students/get-students", {
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -44,6 +40,7 @@ function Students() {
 
     const handleDelete = (id) => {
         const isConfirmed = window.confirm("Are you sure you want to remove this student?");
+
         if (isConfirmed) {
             const token = localStorage.getItem('authToken');
             axios.delete('http://localhost:3001/students/deleteStudent/' + id, {
@@ -52,7 +49,7 @@ function Students() {
                 }
             })
                 .then(() => {
-                    dispatch(deleteStudent(id)); // Dispatch DELETE action to store
+                    dispatch(deleteStudent(id));
                 })
                 .catch(err => console.log(err));
         } else {
@@ -74,12 +71,11 @@ function Students() {
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
     const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
 
-    const { token, logout, user } = useContext(AuthContext);
-
     return (
         <div>
             <Navbar />
             <div className="d-flex vh-100 justify-content-center align-items-center" style={{ position: 'relative' }}>
+
                 <div className="logout-button"></div>
                 <div className="w-75 bg-white rounded p-3">
 
@@ -106,7 +102,6 @@ function Students() {
 
                     <div className='table-responsive'>
                         <table className="table text-center">
-
                             <thead>
                                 <tr>
                                     <th>Profile Picture</th>
@@ -119,7 +114,7 @@ function Students() {
                                             )}
                                         </>
                                     ) : (
-                                        <p>Please log in to see the dashboard.</p>
+                                        <th><p>Please log in to see the dashboard.</p></th>
                                     )}
                                 </tr>
                             </thead>
@@ -165,7 +160,7 @@ function Students() {
                                                         )}
                                                     </>
                                                 ) : (
-                                                    <p>Please log in to see the dashboard.</p>
+                                                    <td><p>Please log in to see the dashboard.</p></td>
                                                 )}
                                             </tr>
                                         )
@@ -193,36 +188,6 @@ function Students() {
                         </ul>
                     </nav>
                 </div>
-
-                <style>
-                    {`
-                        .d-flex::before {
-                            content: "";
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            background-image: url("https://www.oxfordlearning.com/wp-content/uploads/2018/09/how-to-help-your-child-focus-in-school-860x420.jpeg");
-                            background-size: cover;
-                            background-repeat: no-repeat;
-                            opacity: 0.5;
-                            z-index: -1;
-                        }
-                        .logout-button {
-                            position: absolute;
-                            top: 10px;
-                            right: 10px;
-                        }
-                        button:hover {
-                            opacity: 0.7;
-                            cursor: pointer;
-                        }
-                        button:focus {
-                            outline: none; /* Removes the default focus outline */
-                        }
-                    `}
-                </style>
             </div>
         </div>
     )

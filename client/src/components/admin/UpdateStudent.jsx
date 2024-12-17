@@ -4,10 +4,9 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Joi from 'joi';
 import Navbar from '../client/Navbar';
-
 import { useDispatch } from 'react-redux';
 import { updateStudent } from '../../redux/studentSlice';
-
+import '../../assets/admin/CreateStudent.css';
 
 function UpdateStudent() {
 
@@ -54,7 +53,6 @@ function UpdateStudent() {
             }
         })
             .then(result => {
-                console.log(result)
                 setName(result.data.name)
                 setSurname(result.data.surname);
                 const formattedBirthdate = new Date(result.data.birthdate).toLocaleDateString('en-CA');
@@ -116,7 +114,6 @@ function UpdateStudent() {
             }
         })
             .then(result => {
-                console.log(result);
                 dispatch(updateStudent(result.data));
                 navigate('/');
             })
@@ -197,23 +194,6 @@ function UpdateStudent() {
                         <button className='btn btn-success' style={{ gridColumn: 'span 2' }}>Update</button>
                     </form>
                 </div>
-                <style>
-                    {`
-                    .d-flex::before {
-                        content: "";
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-image: url("https://www.oxfordlearning.com/wp-content/uploads/2018/09/how-to-help-your-child-focus-in-school-860x420.jpeg");
-                        background-size: cover;
-                        background-repeat: no-repeat;
-                        opacity: 0.5; /* Set the opacity for the background image */
-                        z-index: -1; /* Keeps the image behind the content */
-                    }
-                   `}
-                </style>
             </div>
         </div>
     )

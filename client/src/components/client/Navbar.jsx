@@ -1,15 +1,17 @@
 import React, { useContext } from 'react';
-import { AuthContext } from '../../context/AuthContext';
+import { useSelector, useDispatch } from 'react-redux'; 
 import { useNavigate, Link } from 'react-router-dom';
+import { logout } from '../../redux/authSlice';
 
 const Navbar = () => {
 
-    const { user, logout } = useContext(AuthContext);
-    console.log(user);
+    const user = useSelector((state) => state.auth.user);
+    console.log('navbar',user);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        logout();
+        dispatch(logout());
         navigate('/login');
     };
 
