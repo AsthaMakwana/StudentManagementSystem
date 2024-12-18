@@ -122,6 +122,10 @@ function CreateStudent() {
             <div className='d-flex vh-100 justify-content-center align-items-center' style={{ position: 'relative' }}>
                 <div className='w-75 bg-white rounded p-3'>
 
+                    <button className="btn btn-light mb-3" onClick={() => navigate(-1)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        ← Back
+                    </button>
+
                     <form onSubmit={Submit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
 
                         <h2 style={{ textAlign: 'center', gridColumn: 'span 2' }}>Add Student</h2>
