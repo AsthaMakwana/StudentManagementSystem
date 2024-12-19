@@ -58,11 +58,53 @@ exports.createStudent = (req, res) => {
         .catch(err => res.status(500).json({ message: 'Error creating student', error: err }));
 };
 
-exports.getStudents = (req, res) => {
-    StudentModel.find({})
-        .then(students => res.json(students))
-        .catch(err => res.status(500).json({ message: 'Error fetching students', error: err }));
+// exports.getStudents = (req, res) => {
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = parseInt(req.query.limit) || 5;
+//     const skip = (page - 1) * limit;
+
+//     StudentModel.find({})
+//         .skip(skip)
+//         .limit(limit)
+//         .then(students => {
+//             StudentModel.countDocuments()
+//                 .then(totalCount => {
+//                     const totalPages = Math.ceil(totalCount / limit);
+//                     res.json({ students, totalPages });
+//                 })
+//         })
+//         .catch(err => res.status(500).json({ message: 'Error fetching students', error: err }));
+// };
+
+exports.getStudents = async (req, res) => {
+    try {
+        const { page = 1, limit = 5, searchQuery } = req.query;
+
+        let query = {};
+        if (searchQuery) {
+            query = {
+                $or: [
+                    { name: { $regex: searchQuery, $options: "i" } },
+                    { surname: { $regex: searchQuery, $options: "i" } },
+                    { email: { $regex: searchQuery, $options: "i" } }
+                ]
+            };
+        }
+
+        const students = await StudentModel.find(query)
+            .limit(parseInt(limit))
+            .skip((page - 1) * parseInt(limit));
+
+        const totalStudents = await StudentModel.countDocuments(query);
+        const totalPages = Math.ceil(totalStudents / limit);
+
+        res.json({ students, totalPages });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error fetching students" });
+    }
 };
+
 
 exports.getStudentById = (req, res) => {
     const id = req.params.id;
@@ -104,8 +146,11 @@ exports.deleteStudent = (req, res) => {
 
 exports.checkEmail = (req, res) => {
     const { email } = req.body;
+    console.log('email',email)
     StudentModel.findOne({ email: email })
+    
         .then(student => {
+            console.log('mm', student);
             if (student) {
                 res.json({ exists: true });
             } else {

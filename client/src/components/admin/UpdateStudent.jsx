@@ -1,16 +1,19 @@
 import React from 'react';
-import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Joi from 'joi';
 import Navbar from '../client/Navbar';
-import { useDispatch } from 'react-redux';
-import { updateStudent } from '../../redux/studentSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateStudentAsync, getStudentByIdAsync } from '../../redux/studentSlice';
 import '../../assets/admin/CreateStudent.css';
 
 function UpdateStudent() {
 
     const { id } = useParams();
+    const student = useSelector(state => state.students.student);
+    const loading = useSelector(state => state.students.loading);
+    const error = useSelector(state => state.students.error);
+
     const [name, setName] = useState();
     const [surname, setSurname] = useState();
     const [birthdate, setBirthdate] = useState();
@@ -34,6 +37,24 @@ function UpdateStudent() {
         age: Joi.number().integer().min(1).required(),
     });
 
+    useEffect(() => {
+        const token = localStorage.getItem('authToken');
+        dispatch(getStudentByIdAsync({ id, token }));
+    }, [dispatch, id]);
+
+    useEffect(() => {
+        if (student) {
+            setName(student.name);
+            setSurname(student.surname);
+            setBirthdate(new Date(student.birthdate).toLocaleDateString('en-CA'));
+            setRollno(student.rollno);
+            setAddress(student.address);
+            setEmail(student.email);
+            setAge(student.age);
+            setProfilePicture(student.profilePicture);
+        }
+    }, [student]);
+
     const calculateAge = (birthdate) => {
         const birthDate = new Date(birthdate);
         const today = new Date;
@@ -44,27 +65,6 @@ function UpdateStudent() {
         }
         return age;
     }
-
-    useEffect(() => {
-        const token = localStorage.getItem('authToken');
-        axios.get("http://localhost:3001/students/getStudent/" + id, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            }
-        })
-            .then(result => {
-                setName(result.data.name)
-                setSurname(result.data.surname);
-                const formattedBirthdate = new Date(result.data.birthdate).toLocaleDateString('en-CA');
-                setBirthdate(formattedBirthdate)
-                setRollno(result.data.rollno)
-                setAddress(result.data.address)
-                setEmail(result.data.email)
-                setAge(result.data.age)
-                setProfilePicture(result.data.profilePicture)
-            })
-            .catch(err => console.log(err))
-    }, [])
 
     useEffect(() => {
         if (birthdate) {
@@ -79,10 +79,10 @@ function UpdateStudent() {
 
     const Update = (e) => {
         e.preventDefault();
-
-        const { error } = studentSchema.validate({
-            name, surname, birthdate, rollno, address, email, age
-        }, { abortEarly: false });
+        const { error } = studentSchema.validate(
+            { name, surname, birthdate, rollno, address, email, age },
+            { abortEarly: false }
+        );
 
         if (error) {
             const newErrors = error.details.reduce((acc, curr) => {
@@ -94,33 +94,19 @@ function UpdateStudent() {
         }
         setErrors({});
 
-        const formData = new FormData();
-        formData.append('name', name);
-        formData.append('surname', surname);
-        formData.append('birthdate', birthdate);
-        formData.append('rollno', rollno);
-        formData.append('address', address);
-        formData.append('email', email);
-        formData.append('age', age);
-
-        if (selectedFile) {
-            formData.append('profilePicture', selectedFile);
-        }
-
         const token = localStorage.getItem('authToken');
-        axios.put("http://localhost:3001/students/updateStudent/" + id, formData, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            }
-        })
-            .then(result => {
-                dispatch(updateStudent(result.data));
-                navigate('/');
-            })
-            .catch(err => {
-                console.log(err);
-            });
-    }
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("surname", surname);
+        formData.append("birthdate", birthdate);
+        formData.append("rollno", rollno);
+        formData.append("address", address);
+        formData.append("email", email);
+        formData.append("age", age);
+        if (selectedFile) formData.append("profilePicture", selectedFile);
+
+        dispatch(updateStudentAsync({ id, formData, token })).then(() => navigate("/"));
+    };
 
     return (
         <div>

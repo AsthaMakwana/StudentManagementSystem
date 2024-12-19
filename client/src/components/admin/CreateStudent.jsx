@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { addStudent } from '../../redux/studentSlice';
-import axios from "axios";
+import { createStudentAsync } from '../../redux/studentSlice';
 import { useNavigate } from 'react-router-dom';
 import Joi from 'joi';
 import Navbar from '../client/Navbar';
@@ -53,13 +52,47 @@ function CreateStudent() {
         setProfilePicture(e.target.files[0]);
     };
 
+    // const Submit = (e) => {
+    //     e.preventDefault();
+    //     const { error } = studentSchema.validate(
+    //         { name, surname, birthdate, rollno, address, email, age },
+    //         { abortEarly: false }
+    //     );
+
+    //     if (error) {
+    //         const newErrors = error.details.reduce((acc, curr) => {
+    //             acc[curr.path[0]] = curr.message;
+    //             return acc;
+    //         }, {});
+    //         setErrors(newErrors);
+    //         return;
+    //     }
+    //     setErrors({});
+
+    //     const token = localStorage.getItem('authToken');
+    //     const formData = new FormData();
+    //     formData.append("name", name);
+    //     formData.append("surname", surname);
+    //     formData.append("birthdate", birthdate);
+    //     formData.append("rollno", rollno);
+    //     formData.append("address", address);
+    //     formData.append("email", email);
+    //     formData.append("age", age);
+    //     if (profilePicture) formData.append("profilePicture", profilePicture);
+
+    //     dispatch(createStudentAsync({ formData, token })).then(() => navigate("/"));
+    // };
     const Submit = (e) => {
         e.preventDefault();
-        const { error } = studentSchema.validate({
-            name, surname, birthdate, rollno, address, email, age
-        }, { abortEarly: false });
+
+        // Validate fields using studentSchema
+        const { error } = studentSchema.validate(
+            { name, surname, birthdate, rollno, address, email, age },
+            { abortEarly: false }
+        );
 
         if (error) {
+            // If validation fails, set errors state
             const newErrors = error.details.reduce((acc, curr) => {
                 acc[curr.path[0]] = curr.message;
                 return acc;
@@ -67,52 +100,36 @@ function CreateStudent() {
             setErrors(newErrors);
             return;
         }
-        setErrors({});
+        setErrors({}); // Reset errors if validation is successful
 
         const token = localStorage.getItem('authToken');
-        axios.post("http://localhost:3001/students/checkEmail", { email }, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            }
-        })
-            .then(response => {
-                if (response.data.exists) {
+
+        // Create formData for student creation
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("surname", surname);
+        formData.append("birthdate", birthdate);
+        formData.append("rollno", rollno);
+        formData.append("address", address);
+        formData.append("email", email);
+        formData.append("age", age);
+        if (profilePicture) formData.append("profilePicture", profilePicture);
+
+        // Dispatch the action to check email and create the student
+        dispatch(createStudentAsync({ formData, token }))
+            .unwrap()
+            .then(() => navigate("/"))
+            .catch((error) => {
+                // On failure, set the error message in state
+                if (error.email) {
                     setErrors((prevErrors) => ({
                         ...prevErrors,
-                        email: "This email is already in use."
+                        email: error.email // Show email error
                     }));
+                } else {
+                    // Handle other errors if necessary
+                    console.error(error);
                 }
-                else {
-                    const formData = new FormData();
-                    formData.append("name", name);
-                    formData.append("surname", surname);
-                    formData.append("birthdate", birthdate);
-                    formData.append("rollno", rollno);
-                    formData.append("address", address);
-                    formData.append("email", email);
-                    formData.append("age", age);
-
-                    if (profilePicture) {
-                        formData.append("profilePicture", profilePicture);
-                    }
-
-                    const token = localStorage.getItem('authToken');
-                    axios.post("http://localhost:3001/students/createStudent", formData, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                        }
-                    })
-                        .then(result => {
-                            dispatch(addStudent(result.data));
-                            navigate("/");
-                        })
-                        .catch(err => {
-                            console.log(err);
-                        });
-                }
-            })
-            .catch(err => {
-                console.log(err);
             });
     };
 

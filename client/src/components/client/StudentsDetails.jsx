@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { setStudents } from '../../redux/studentSlice';
+import { getStudentByIdAsync } from '../../redux/studentSlice';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import '../../assets/client/StudentsDetails.css';
@@ -12,27 +11,24 @@ function StudentsDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const student = useSelector(state =>
-        state.students.students.find(student => student._id === id)
-    );
+
+    const student = useSelector(state => state.students.student);
+    console.log('////',student);
+    
+    const loading = useSelector(state => state.students.loading);
+    const error = useSelector(state => state.students.error);
 
     useEffect(() => {
-        if (!student) {
-            const token = localStorage.getItem('authToken');
-            axios.get(`http://localhost:3001/students/getStudent/${id}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                }
-            })
-                .then(result => {
-                    dispatch(setStudents([result.data]));
-                })
-                .catch(err => console.log(err));
-        }
-    }, [id, student, dispatch]);
+        const token = localStorage.getItem('authToken');
+        dispatch(getStudentByIdAsync({ id, token }));
+    }, [id, dispatch]);
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
     if (!student) {
-        return <div>Loading...</div>;
+        return <div>No student data found.</div>;
     }
 
     return (

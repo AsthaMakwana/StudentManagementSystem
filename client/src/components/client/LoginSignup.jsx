@@ -1,8 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
-import axios from 'axios';
 import '../../assets/client/LoginSignup.css';
 import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../../redux/authSlice';
+import { loginAsync, signupAsync } from '../../redux/authSlice';
 import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
@@ -37,65 +36,26 @@ const LoginSignup = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await axios.post('http://localhost:3001/api/auth/login', {
-        email: loginData.email,
-        password: loginData.password,
-      });
-
-      if (response.data.token) {
-        dispatch(
-          login({
-            token: response.data.token,
-            user: response.data.user,
-          })
-        );
-        setError('');
-        toast.success('Login successful!');
-        setTimeout(() => {
-          navigate('/');
-        }, 1000);
-      }
-    }
-    catch (err) {
-      console.log(err);
+      await dispatch(loginAsync({ email: loginData.email, password: loginData.password })).unwrap();
+      toast.success('Login successful!');
+      setTimeout(() => {
+        navigate('/');
+      }, 1000);
+    } catch (err) {
       setError('Login failed. Please check your credentials.');
     }
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await axios.post('http://localhost:3001/api/auth/signup', {
-        username: signupData.username,
-        email: signupData.email,
-        password: signupData.password,
-        role: signupData.role,
-      });
-
-      if (response.status === 201) {
-
-        const loginResponse = await axios.post('http://localhost:3001/api/auth/login', {
-          email: signupData.email,
-          password: signupData.password,
-        });
-
-        dispatch(
-          login({
-            token: loginResponse.data.token,
-            user: loginResponse.data.user,
-          })
-        );
-        setError('');
-        toast.success('Signup successful!');
-        setTimeout(() => {
-          navigate('/');
-        }, 1000);
-      }
-    }
-    catch (err) {
+      await dispatch(signupAsync(signupData)).unwrap();
+      toast.success('Signup successful!');
+      setTimeout(() => {
+        navigate('/');
+      }, 1000);
+    } catch (err) {
       setError('Signup failed. Please try again.');
     }
   };

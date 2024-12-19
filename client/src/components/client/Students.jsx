@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { FiInfo } from 'react-icons/fi';
 import Navbar from './Navbar';
 import { useDispatch, useSelector } from 'react-redux';
-import { setStudents, deleteStudent } from '../../redux/studentSlice';
+import { setStudentAsync, deleteStudentAsync } from '../../redux/studentSlice';
 import '../../assets/client/Students.css';
 
 function Students() {
@@ -14,23 +13,22 @@ function Students() {
     const [currentPage, setCurrentPage] = useState(1);
     const [studentsPerPage] = useState(5);
 
-    const students = useSelector(state => state.students.students);
+    const students = useSelector(state => state.students.students || []);
+    const totalPages = useSelector(state => state.students.totalPages);
     const user = useSelector(state => state.auth.user);
-    console.log('students',user);
+    console.log('students/////', students);
     const dispatch = useDispatch();
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
-        axios.get("http://localhost:3001/students/get-students", {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            }
-        })
-            .then(result => {
-                dispatch(setStudents(result.data));
-            })
-            .catch(err => console.log(err))
-    }, [dispatch])
+        dispatch(setStudentAsync({
+            currentPage,
+            studentsPerPage,
+            token, 
+            searchQuery,
+        }));
+    }, [dispatch, currentPage, studentsPerPage, searchQuery]);
+
 
     function formatDate(dateString) {
         const date = new Date(dateString);
@@ -40,36 +38,52 @@ function Students() {
 
     const handleDelete = (id) => {
         const isConfirmed = window.confirm("Are you sure you want to remove this student?");
-
         if (isConfirmed) {
-            const token = localStorage.getItem('authToken');
-            axios.delete('http://localhost:3001/students/deleteStudent/' + id, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                }
-            })
-                .then(() => {
-                    dispatch(deleteStudent(id));
-                })
-                .catch(err => console.log(err));
+          const token = localStorage.getItem('authToken');
+          dispatch(deleteStudentAsync({ id, token }))
+            .then(() => {
+              dispatch(setStudentAsync({
+                currentPage,
+                studentsPerPage,
+                searchQuery,
+                token
+              }));
+            });
         } else {
-            console.log("Deletion canceled.");
+          console.log("Deletion canceled.");
         }
-    }
+      };
 
-    const filteredStudents = students.filter(student => {
-        return (
-            (student.name && student.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (student.surname && student.surname.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (student.email && student.email.toLowerCase().includes(searchQuery.toLowerCase()))
-        );
-    });
+    // const handleDelete = async (id) => {
+    //     const isConfirmed = window.confirm("Are you sure you want to delete this student?");
+    //     if (isConfirmed) {
+    //         const token = localStorage.getItem('authToken');
+    //         try {
+    //             await dispatch(deleteStudentAsync({ id, token }));
+    
+    //             // Re-fetch the updated students
+    //             await dispatch(setStudentAsync({ currentPage, studentsPerPage, token, searchQuery }));
+    //         } catch (error) {
+    //             console.error("Failed to delete student:", error);
+    //         }
+    //     }
+    // };
+    
+    
+    
+      
+    // const filteredStudents = (students.students || []).filter(student => {
+    //     return (
+    //         (student.name && student.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    //         (student.surname && student.surname.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    //         (student.email && student.email.toLowerCase().includes(searchQuery.toLowerCase()))
+    //     );
+    // });
 
-    const indexOfLastStudent = currentPage * studentsPerPage;
-    const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
-    const currentStudents = filteredStudents.slice(indexOfFirstStudent, indexOfLastStudent);
+    // const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
+    // console.log('total', totalPages);
+
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
-    const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
 
     return (
         <div>
@@ -120,52 +134,36 @@ function Students() {
                             </thead>
 
                             <tbody>
-                                {
-                                    currentStudents.map((student) => {
-
-                                        return (
-                                            <tr key={student._id}>
-                                                <td>
-                                                    {student.profilePicture ? (
-                                                        <img src={`http://localhost:3001${student.profilePicture}`} alt="Profile" style={{ width: '50px', height: '50px', borderRadius: '50%' }} />
-                                                    ) : (
-                                                        <span>No Image</span>
-                                                    )}
-                                                </td>
-                                                <td>{student.name}</td>
-                                                <td>{student.rollno}</td>
-
-                                                {user ? (
-                                                    <>
-                                                        {user.role === 'admin' && (
-
-                                                            <td className="justify-content-center">
-
-                                                                <Link to={`/update/${student._id}`}>
-                                                                    <button className='btn btn-light me-2' title="Edit" style={{ border: 'none', background: 'transparent' }}>
-                                                                        <FaEdit size={20} style={{ color: 'black' }} />
-                                                                    </button>
-                                                                </Link>
-
-                                                                <Link to={`/details/${student._id}`}>
-                                                                    <button className="btn btn-light" title="Details" style={{ border: 'none', background: 'transparent' }}>
-                                                                        <FiInfo size={20} style={{ color: 'black' }} />
-                                                                    </button>
-                                                                </Link>
-
-                                                                <button className='btn btn-light me-2' onClick={(e) => handleDelete(student._id)} title="Delete" style={{ border: 'none', background: 'transparent' }}>
-                                                                    <FaTrash size={20} style={{ color: 'black' }} />
-                                                                </button>
-                                                            </td>
-                                                        )}
-                                                    </>
-                                                ) : (
-                                                    <td><p>Please log in to see the dashboard.</p></td>
-                                                )}
-                                            </tr>
-                                        )
-                                    })
-                                }
+                                {(students.students || []).map(student => (
+                                    <tr key={student._id}>
+                                        <td>
+                                            {student.profilePicture ? (
+                                                <img src={`http://localhost:3001${student.profilePicture}`} alt="Profile" style={{ width: '50px', height: '50px', borderRadius: '50%' }} />
+                                            ) : (
+                                                <span>No Image</span>
+                                            )}
+                                        </td>
+                                        <td>{student.name}</td>
+                                        <td>{student.rollno}</td>
+                                        {user && user.role === 'admin' && (
+                                            <td className="justify-content-center">
+                                                <Link to={`/update/${student._id}`}>
+                                                    <button className='btn btn-light me-2' title="Edit">
+                                                        <FaEdit size={20} style={{ color: 'black' }} />
+                                                    </button>
+                                                </Link>
+                                                <Link to={`/details/${student._id}`}>
+                                                    <button className="btn btn-light" title="Details">
+                                                        <FiInfo size={20} style={{ color: 'black' }} />
+                                                    </button>
+                                                </Link>
+                                                <button className='btn btn-light me-2' onClick={() => handleDelete(student._id)} title="Delete">
+                                                    <FaTrash size={20} style={{ color: 'black' }} />
+                                                </button>
+                                            </td>
+                                        )}
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
