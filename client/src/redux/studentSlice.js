@@ -45,7 +45,8 @@ export const updateStudentAsync = createAsyncThunk(
 
 export const setStudentAsync = createAsyncThunk('students/getStudents', async ({ currentPage, studentsPerPage, token, searchQuery, ageFilter }) => {
   try {
-    const response = await axios.get("http://localhost:3001/students/get-students", {
+    const response = await axios.get(`${API_BASE_URL}/get-students`, {
+      
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -57,6 +58,9 @@ export const setStudentAsync = createAsyncThunk('students/getStudents', async ({
         ageFilter
       },
     });
+    console.log('///',searchQuery);
+    console.log('++++',ageFilter);
+    
     return response.data;
   } catch (error) {
     console.error('Error fetching students:', error);
@@ -67,7 +71,7 @@ export const setStudentAsync = createAsyncThunk('students/getStudents', async ({
 
 export const deleteStudentAsync = createAsyncThunk('students/deleteStudent', async ({ id, token }) => {
   try {
-    await axios.delete(`http://localhost:3001/students/deleteStudent/${id}`, {
+    await axios.delete(`${API_BASE_URL}/deleteStudent/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       }
@@ -82,7 +86,7 @@ export const deleteStudentAsync = createAsyncThunk('students/deleteStudent', asy
 
 export const getStudentByIdAsync = createAsyncThunk('students/getStudentById', async ({ id, token }) => {
   try {
-    const response = await axios.get(`http://localhost:3001/students/getStudent/${id}`, {
+    const response = await axios.get(`${API_BASE_URL}/getStudent/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       }

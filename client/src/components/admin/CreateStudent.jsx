@@ -5,6 +5,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Joi from 'joi';
 import Navbar from '../client/Navbar';
 import '../../assets/admin/CreateStudent.css';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function CreateStudent() {
 
@@ -85,7 +87,10 @@ function CreateStudent() {
 
         dispatch(createStudentAsync({ formData, token }))
             .unwrap()
-            .then(() => navigate("/", { state: { page: location.state?.fromPage || 1 } }))
+            .then(() => {
+                toast.success('Student created successfully!');
+                navigate("/", { state: { page: location.state?.fromPage || 1 } });
+            })
             .catch((error) => {
                 if (error.email) {
                     setErrors((prevErrors) => ({

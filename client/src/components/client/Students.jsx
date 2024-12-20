@@ -6,6 +6,7 @@ import Navbar from './Navbar';
 import { useDispatch, useSelector } from 'react-redux';
 import { setStudentAsync, deleteStudentAsync } from '../../redux/studentSlice';
 import '../../assets/client/Students.css';
+import { ToastContainer } from 'react-toastify';
 
 function Students() {
 
@@ -139,7 +140,7 @@ function Students() {
                                         <td>{student.rollno}</td>
                                         {user && user.role === 'admin' && (
                                             <td className="justify-content-center">
-                                                <Link to={`/update/${student._id}`} state={{ fromPage: currentPage }}>
+                                                <Link to={`/update/${student._id}`} state={{ fromPage: currentPage}}>
                                                     <button className='btn btn-light me-2' title="Edit">
                                                         <FaEdit size={20} style={{ color: 'black' }} />
                                                     </button>
@@ -177,6 +178,7 @@ function Students() {
                             </li>
                         </ul>
                     </nav>
+                    <ToastContainer />
                 </div>
             </div>
         </div>
