@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 export const createStudentAsync = createAsyncThunk(
   'students/createStudent',
@@ -54,13 +54,9 @@ export const setStudentAsync = createAsyncThunk('students/getStudents', async ({
         page: currentPage,
         limit: studentsPerPage,
         searchQuery,
-        //
-        ageFilter
+        ageFilter,
       },
     });
-    console.log('///',searchQuery);
-    console.log('++++',ageFilter);
-    
     return response.data;
   } catch (error) {
     console.error('Error fetching students:', error);

@@ -5,13 +5,14 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Joi from 'joi';
 import Navbar from '../client/Navbar';
 import '../../assets/admin/CreateStudent.css';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function CreateStudent() {
 
     const dispatch = useDispatch();
     const location = useLocation();
+    const navigate = useNavigate();
 
     const [name, setName] = useState();
     const [surname, setSurname] = useState();
@@ -22,7 +23,6 @@ function CreateStudent() {
     const [age, setAge] = useState();
     const [errors, setErrors] = useState({});
     const [profilePicture, setProfilePicture] = useState(null);
-    const navigate = useNavigate();
 
     const studentSchema = Joi.object({
         name: Joi.string().min(3).max(30).required(),
@@ -88,8 +88,11 @@ function CreateStudent() {
         dispatch(createStudentAsync({ formData, token }))
             .unwrap()
             .then(() => {
-                toast.success('Student created successfully!');
-                navigate("/", { state: { page: location.state?.fromPage || 1 } });
+                toast.success('Student added successfully!');
+                setTimeout(() => {
+                    navigate("/", { state: { page: location.state?.fromPage || 1 } });
+                }, 2000);
+
             })
             .catch((error) => {
                 if (error.email) {
@@ -115,6 +118,8 @@ function CreateStudent() {
 
                     <form onSubmit={Submit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
 
+                        <ToastContainer />
+                        
                         <h2 style={{ textAlign: 'center', gridColumn: 'span 2' }}>Add Student</h2>
 
                         <div className='mb-2'>

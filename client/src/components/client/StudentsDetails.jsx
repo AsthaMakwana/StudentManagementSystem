@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getStudentByIdAsync } from '../../redux/studentSlice';
@@ -14,7 +14,6 @@ function StudentsDetails() {
     const dispatch = useDispatch();
 
     const student = useSelector(state => state.students.student);
-    
     const loading = useSelector(state => state.students.loading);
     const error = useSelector(state => state.students.error);
 
@@ -36,9 +35,11 @@ function StudentsDetails() {
             <Navbar />
             <div className='d-flex vh-100 justify-content-center align-items-center' style={{ position: 'relative' }}>
                 <div className='w-75 bg-white rounded p-3'>
+
                     <button className="btn btn-light mb-3" onClick={() => navigate(`/`, { state: { page: location.state?.fromPage || 1 } })} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         ← Back
                     </button>
+
                     <h2 className="text-center">Student Details</h2>
 
                     <div className="card">

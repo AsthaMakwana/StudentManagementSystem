@@ -3,7 +3,6 @@ import axios from 'axios';
 
 const AUTH_API_BASE_URL = process.env.REACT_APP_AUTH_API_BASE_URL;
 
-
 const initialState = {
   token: localStorage.getItem('authToken') || null,
   user: null,

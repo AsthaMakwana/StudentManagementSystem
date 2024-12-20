@@ -1,6 +1,6 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../assets/client/LoginSignup.css';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { loginAsync, signupAsync } from '../../redux/authSlice';
 import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -61,33 +61,20 @@ const LoginSignup = () => {
   };
 
   return (
+
     <div className="container">
       <div className={`login form ${isLoginMode ? 'active' : ''}`}>
         <header>Login</header>
 
         <form onSubmit={handleLogin}>
 
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter your email"
-            value={loginData.email}
-            onChange={handleLoginChange}
-            required
-          />
-
-          <input
-            type="password"
-            name="password"
-            placeholder="Enter your password"
-            value={loginData.password}
-            onChange={handleLoginChange}
-            required
-          />
+          <input type="email" name="email" placeholder="Enter your email" value={loginData.email} onChange={handleLoginChange} required />
+          <input type="password" name="password" placeholder="Enter your password" value={loginData.password} onChange={handleLoginChange} required />
 
           {error && <div className="error">{error}</div>}
 
           <input type="submit" className="button" value="Login" />
+
         </form>
 
         <div className="signup">
@@ -103,32 +90,9 @@ const LoginSignup = () => {
 
         <form onSubmit={handleSignup}>
 
-          <input
-            type="text"
-            name="username"
-            placeholder="Enter your username"
-            value={signupData.username}
-            onChange={handleSignupChange}
-            required
-          />
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter your email"
-            value={signupData.email}
-            onChange={handleSignupChange}
-            required
-          />
-
-          <input
-            type="password"
-            name="password"
-            placeholder="Create a password"
-            value={signupData.password}
-            onChange={handleSignupChange}
-            required
-          />
+          <input type="text" name="username" placeholder="Enter your username" value={signupData.username} onChange={handleSignupChange} required/>
+          <input type="email" name="email" placeholder="Enter your email" value={signupData.email} onChange={handleSignupChange} required/>
+          <input type="password" name="password" placeholder="Create a password" value={signupData.password} onChange={handleSignupChange} required/>
 
           <select name="role" value={signupData.role} onChange={handleSignupChange} required>
             <option value="user">User</option>
@@ -138,6 +102,7 @@ const LoginSignup = () => {
           {error && <div className="error">{error}</div>}
 
           <input type="submit" className="button" value="Signup" />
+
         </form>
 
         <div className="signup">

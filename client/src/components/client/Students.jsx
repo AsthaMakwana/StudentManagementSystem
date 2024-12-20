@@ -1,16 +1,19 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { FiInfo } from 'react-icons/fi';
 import Navbar from './Navbar';
 import { useDispatch, useSelector } from 'react-redux';
 import { setStudentAsync, deleteStudentAsync } from '../../redux/studentSlice';
 import '../../assets/client/Students.css';
-import { ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Students() {
 
     const location = useLocation();
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(location.state?.page || 1);
@@ -20,7 +23,6 @@ function Students() {
     const students = useSelector(state => state.students.students || []);
     const totalPages = useSelector(state => state.students.totalPages);
     const user = useSelector(state => state.auth.user);
-    const dispatch = useDispatch();
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
@@ -33,6 +35,11 @@ function Students() {
         }));
     }, [dispatch, currentPage, studentsPerPage, searchQuery, ageFilter]);
 
+    useEffect(() => {
+        if (currentPage > totalPages && totalPages > 0) {
+            setCurrentPage(totalPages);
+        }
+    }, [currentPage, totalPages]);
 
     function formatDate(dateString) {
         const date = new Date(dateString);
@@ -52,23 +59,36 @@ function Students() {
                         searchQuery,
                         token
                     }));
+                    toast.success('Student deleted successfully!');
+                    setTimeout(() => {
+                        navigate("/", { state: { page: location.state?.fromPage || 1 } });
+                    }, 1000);
+
                 });
         } else {
             console.log("Deletion canceled.");
         }
     };
 
-    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+    const paginate = (pageNumber) => {
+        if (pageNumber > totalPages) {
+            setCurrentPage(totalPages);
+        } else {
+            setCurrentPage(pageNumber);
+        }
+    };
 
     return (
         <div>
             <Navbar />
             <div className="d-flex vh-100 justify-content-center align-items-center" style={{ position: 'relative' }}>
-
                 <div className="logout-button"></div>
                 <div className="w-75 bg-white rounded p-3">
 
+                    <ToastContainer />
+
                     <h1 style={{ textAlign: 'center' }}>Student Management System</h1>
+
                     {user ? (
                         <>
                             {user.role === 'admin' && (
@@ -81,11 +101,7 @@ function Students() {
 
                     <div className="mb-3">
                         <label htmlFor="ageFilter" className="form-label">Filter by Age</label>
-                        <select
-                            id="ageFilter"
-                            className="form-select"
-                            onChange={(e) => setAgeFilter(e.target.value)}
-                        >
+                        <select id="ageFilter" className="form-select" onChange={(e) => setAgeFilter(e.target.value)}>
                             <option value="">All Ages</option>
                             <option value="0-10">0-10</option>
                             <option value="11-20">11-20</option>
@@ -96,15 +112,8 @@ function Students() {
                         </select>
                     </div>
 
-
                     <div className="mb-3">
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search by name, surname, or email"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
+                        <input type="text" className="form-control" placeholder="Search by name, surname, or email" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                     </div>
 
                     <div className='table-responsive'>
@@ -125,7 +134,6 @@ function Students() {
                                     )}
                                 </tr>
                             </thead>
-
                             <tbody>
                                 {(students.students || []).map(student => (
                                     <tr key={student._id}>
@@ -140,7 +148,7 @@ function Students() {
                                         <td>{student.rollno}</td>
                                         {user && user.role === 'admin' && (
                                             <td className="justify-content-center">
-                                                <Link to={`/update/${student._id}`} state={{ fromPage: currentPage}}>
+                                                <Link to={`/update/${student._id}`} state={{ fromPage: currentPage }}>
                                                     <button className='btn btn-light me-2' title="Edit">
                                                         <FaEdit size={20} style={{ color: 'black' }} />
                                                     </button>
@@ -178,7 +186,6 @@ function Students() {
                             </li>
                         </ul>
                     </nav>
-                    <ToastContainer />
                 </div>
             </div>
         </div>

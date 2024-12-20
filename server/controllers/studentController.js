@@ -84,8 +84,8 @@ exports.getStudents = async (req, res) => {
         }
 
         const students = await StudentModel.find(query)
-            .limit(parseInt(limit))
-            .skip((page - 1) * parseInt(limit));
+            .skip((page - 1) * parseInt(limit))
+            .limit(parseInt(limit));
 
         const totalStudents = await StudentModel.countDocuments(query);
         const totalPages = Math.ceil(totalStudents / limit);

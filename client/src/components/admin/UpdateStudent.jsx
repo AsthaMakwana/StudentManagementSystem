@@ -6,14 +6,16 @@ import Navbar from '../client/Navbar';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateStudentAsync, getStudentByIdAsync } from '../../redux/studentSlice';
 import '../../assets/admin/CreateStudent.css';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function UpdateStudent() {
 
     const { id } = useParams();
     const location = useLocation();
     const student = useSelector(state => state.students.student);
-    const loading = useSelector(state => state.students.loading);
-    const error = useSelector(state => state.students.error);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const [name, setName] = useState();
     const [surname, setSurname] = useState();
@@ -25,8 +27,6 @@ function UpdateStudent() {
     const [errors, setErrors] = useState({});
     const [profilePicture, setProfilePicture] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     const studentSchema = Joi.object({
         name: Joi.string().min(3).max(30).required(),
@@ -106,7 +106,14 @@ function UpdateStudent() {
         formData.append("age", age);
         if (selectedFile) formData.append("profilePicture", selectedFile);
 
-        dispatch(updateStudentAsync({ id, formData, token })).then(() => navigate("/", { state: { page: location.state?.fromPage || 1 } }));
+        dispatch(updateStudentAsync({ id, formData, token }))
+            .then(() => {
+                toast.success('Student updated successfully!');
+                setTimeout(() => {
+                    navigate("/", { state: { page: location.state?.fromPage || 1 } });
+                }, 2000);
+
+            })
     };
 
     return (
@@ -121,6 +128,8 @@ function UpdateStudent() {
 
                     <form onSubmit={Update} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
 
+                        <ToastContainer />
+                        
                         <h2 style={{ textAlign: 'center', gridColumn: 'span 2' }}>Update Student</h2>
 
                         <div className='mb-2'>
