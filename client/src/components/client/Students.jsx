@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { FiInfo } from 'react-icons/fi';
 import Navbar from './Navbar';
@@ -9,14 +9,16 @@ import '../../assets/client/Students.css';
 
 function Students() {
 
+    const location = useLocation();
+
     const [searchQuery, setSearchQuery] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(location.state?.page || 1);
     const [studentsPerPage] = useState(5);
+    const [ageFilter, setAgeFilter] = useState('');
 
     const students = useSelector(state => state.students.students || []);
     const totalPages = useSelector(state => state.students.totalPages);
     const user = useSelector(state => state.auth.user);
-    console.log('students/////', students);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -24,10 +26,11 @@ function Students() {
         dispatch(setStudentAsync({
             currentPage,
             studentsPerPage,
-            token, 
+            token,
             searchQuery,
+            ageFilter,
         }));
-    }, [dispatch, currentPage, studentsPerPage, searchQuery]);
+    }, [dispatch, currentPage, studentsPerPage, searchQuery, ageFilter]);
 
 
     function formatDate(dateString) {
@@ -39,49 +42,20 @@ function Students() {
     const handleDelete = (id) => {
         const isConfirmed = window.confirm("Are you sure you want to remove this student?");
         if (isConfirmed) {
-          const token = localStorage.getItem('authToken');
-          dispatch(deleteStudentAsync({ id, token }))
-            .then(() => {
-              dispatch(setStudentAsync({
-                currentPage,
-                studentsPerPage,
-                searchQuery,
-                token
-              }));
-            });
+            const token = localStorage.getItem('authToken');
+            dispatch(deleteStudentAsync({ id, token }))
+                .then(() => {
+                    dispatch(setStudentAsync({
+                        currentPage,
+                        studentsPerPage,
+                        searchQuery,
+                        token
+                    }));
+                });
         } else {
-          console.log("Deletion canceled.");
+            console.log("Deletion canceled.");
         }
-      };
-
-    // const handleDelete = async (id) => {
-    //     const isConfirmed = window.confirm("Are you sure you want to delete this student?");
-    //     if (isConfirmed) {
-    //         const token = localStorage.getItem('authToken');
-    //         try {
-    //             await dispatch(deleteStudentAsync({ id, token }));
-    
-    //             // Re-fetch the updated students
-    //             await dispatch(setStudentAsync({ currentPage, studentsPerPage, token, searchQuery }));
-    //         } catch (error) {
-    //             console.error("Failed to delete student:", error);
-    //         }
-    //     }
-    // };
-    
-    
-    
-      
-    // const filteredStudents = (students.students || []).filter(student => {
-    //     return (
-    //         (student.name && student.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    //         (student.surname && student.surname.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    //         (student.email && student.email.toLowerCase().includes(searchQuery.toLowerCase()))
-    //     );
-    // });
-
-    // const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
-    // console.log('total', totalPages);
+    };
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -97,12 +71,30 @@ function Students() {
                     {user ? (
                         <>
                             {user.role === 'admin' && (
-                                <Link to="/create" className="btn btn-success mb-3">Add Student</Link>
+                                <Link to="/create" state={{ fromPage: currentPage }} className="btn btn-success mb-3">Add Student</Link>
                             )}
                         </>
                     ) : (
                         <p>Please log in to see the dashboard.</p>
                     )}
+
+                    <div className="mb-3">
+                        <label htmlFor="ageFilter" className="form-label">Filter by Age</label>
+                        <select
+                            id="ageFilter"
+                            className="form-select"
+                            onChange={(e) => setAgeFilter(e.target.value)}
+                        >
+                            <option value="">All Ages</option>
+                            <option value="0-10">0-10</option>
+                            <option value="11-20">11-20</option>
+                            <option value="21-30">21-30</option>
+                            <option value="31-40">31-40</option>
+                            <option value="41-50">41-50</option>
+                            <option value="51+">51+</option>
+                        </select>
+                    </div>
+
 
                     <div className="mb-3">
                         <input
@@ -147,12 +139,12 @@ function Students() {
                                         <td>{student.rollno}</td>
                                         {user && user.role === 'admin' && (
                                             <td className="justify-content-center">
-                                                <Link to={`/update/${student._id}`}>
+                                                <Link to={`/update/${student._id}`} state={{ fromPage: currentPage }}>
                                                     <button className='btn btn-light me-2' title="Edit">
                                                         <FaEdit size={20} style={{ color: 'black' }} />
                                                     </button>
                                                 </Link>
-                                                <Link to={`/details/${student._id}`}>
+                                                <Link to={`/details/${student._id}`} state={{ fromPage: currentPage }}>
                                                     <button className="btn btn-light" title="Details">
                                                         <FiInfo size={20} style={{ color: 'black' }} />
                                                     </button>

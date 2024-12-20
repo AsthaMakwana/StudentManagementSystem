@@ -6,7 +6,6 @@ import { logout } from '../../redux/authSlice';
 const Navbar = () => {
 
     const user = useSelector((state) => state.auth.user);
-    console.log('navbar',user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { createStudentAsync } from '../../redux/studentSlice';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Joi from 'joi';
 import Navbar from '../client/Navbar';
 import '../../assets/admin/CreateStudent.css';
@@ -9,6 +9,7 @@ import '../../assets/admin/CreateStudent.css';
 function CreateStudent() {
 
     const dispatch = useDispatch();
+    const location = useLocation();
 
     const [name, setName] = useState();
     const [surname, setSurname] = useState();
@@ -52,47 +53,15 @@ function CreateStudent() {
         setProfilePicture(e.target.files[0]);
     };
 
-    // const Submit = (e) => {
-    //     e.preventDefault();
-    //     const { error } = studentSchema.validate(
-    //         { name, surname, birthdate, rollno, address, email, age },
-    //         { abortEarly: false }
-    //     );
-
-    //     if (error) {
-    //         const newErrors = error.details.reduce((acc, curr) => {
-    //             acc[curr.path[0]] = curr.message;
-    //             return acc;
-    //         }, {});
-    //         setErrors(newErrors);
-    //         return;
-    //     }
-    //     setErrors({});
-
-    //     const token = localStorage.getItem('authToken');
-    //     const formData = new FormData();
-    //     formData.append("name", name);
-    //     formData.append("surname", surname);
-    //     formData.append("birthdate", birthdate);
-    //     formData.append("rollno", rollno);
-    //     formData.append("address", address);
-    //     formData.append("email", email);
-    //     formData.append("age", age);
-    //     if (profilePicture) formData.append("profilePicture", profilePicture);
-
-    //     dispatch(createStudentAsync({ formData, token })).then(() => navigate("/"));
-    // };
     const Submit = (e) => {
         e.preventDefault();
 
-        // Validate fields using studentSchema
         const { error } = studentSchema.validate(
             { name, surname, birthdate, rollno, address, email, age },
             { abortEarly: false }
         );
 
         if (error) {
-            // If validation fails, set errors state
             const newErrors = error.details.reduce((acc, curr) => {
                 acc[curr.path[0]] = curr.message;
                 return acc;
@@ -100,11 +69,10 @@ function CreateStudent() {
             setErrors(newErrors);
             return;
         }
-        setErrors({}); // Reset errors if validation is successful
+        setErrors({});
 
         const token = localStorage.getItem('authToken');
 
-        // Create formData for student creation
         const formData = new FormData();
         formData.append("name", name);
         formData.append("surname", surname);
@@ -115,19 +83,16 @@ function CreateStudent() {
         formData.append("age", age);
         if (profilePicture) formData.append("profilePicture", profilePicture);
 
-        // Dispatch the action to check email and create the student
         dispatch(createStudentAsync({ formData, token }))
             .unwrap()
-            .then(() => navigate("/"))
+            .then(() => navigate("/", { state: { page: location.state?.fromPage || 1 } }))
             .catch((error) => {
-                // On failure, set the error message in state
                 if (error.email) {
                     setErrors((prevErrors) => ({
                         ...prevErrors,
-                        email: error.email // Show email error
+                        email: error.email
                     }));
                 } else {
-                    // Handle other errors if necessary
                     console.error(error);
                 }
             });
@@ -139,7 +104,7 @@ function CreateStudent() {
             <div className='d-flex vh-100 justify-content-center align-items-center' style={{ position: 'relative' }}>
                 <div className='w-75 bg-white rounded p-3'>
 
-                    <button className="btn btn-light mb-3" onClick={() => navigate(-1)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <button className="btn btn-light mb-3" onClick={() => navigate(`/`, { state: { page: location.state?.fromPage || 1 } })} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         ← Back
                     </button>
 

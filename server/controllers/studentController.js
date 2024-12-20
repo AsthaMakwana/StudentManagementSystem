@@ -58,27 +58,10 @@ exports.createStudent = (req, res) => {
         .catch(err => res.status(500).json({ message: 'Error creating student', error: err }));
 };
 
-// exports.getStudents = (req, res) => {
-//     const page = parseInt(req.query.page) || 1;
-//     const limit = parseInt(req.query.limit) || 5;
-//     const skip = (page - 1) * limit;
-
-//     StudentModel.find({})
-//         .skip(skip)
-//         .limit(limit)
-//         .then(students => {
-//             StudentModel.countDocuments()
-//                 .then(totalCount => {
-//                     const totalPages = Math.ceil(totalCount / limit);
-//                     res.json({ students, totalPages });
-//                 })
-//         })
-//         .catch(err => res.status(500).json({ message: 'Error fetching students', error: err }));
-// };
 
 exports.getStudents = async (req, res) => {
     try {
-        const { page = 1, limit = 5, searchQuery } = req.query;
+        const { page = 1, limit = 5, searchQuery, ageFilter } = req.query;
 
         let query = {};
         if (searchQuery) {
@@ -89,6 +72,15 @@ exports.getStudents = async (req, res) => {
                     { email: { $regex: searchQuery, $options: "i" } }
                 ]
             };
+        }
+
+        if (ageFilter) {
+            const [minAge, maxAge] = ageFilter.split('-');
+            if (maxAge) {
+                query.age = { $gte: parseInt(minAge), $lte: parseInt(maxAge) };
+            } else {
+                query.age = { $gte: parseInt(minAge) };
+            }
         }
 
         const students = await StudentModel.find(query)
@@ -146,11 +138,9 @@ exports.deleteStudent = (req, res) => {
 
 exports.checkEmail = (req, res) => {
     const { email } = req.body;
-    console.log('email',email)
     StudentModel.findOne({ email: email })
     
         .then(student => {
-            console.log('mm', student);
             if (student) {
                 res.json({ exists: true });
             } else {

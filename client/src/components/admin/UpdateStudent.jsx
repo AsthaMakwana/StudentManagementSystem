@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Joi from 'joi';
 import Navbar from '../client/Navbar';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,6 +10,7 @@ import '../../assets/admin/CreateStudent.css';
 function UpdateStudent() {
 
     const { id } = useParams();
+    const location = useLocation();
     const student = useSelector(state => state.students.student);
     const loading = useSelector(state => state.students.loading);
     const error = useSelector(state => state.students.error);
@@ -105,7 +106,7 @@ function UpdateStudent() {
         formData.append("age", age);
         if (selectedFile) formData.append("profilePicture", selectedFile);
 
-        dispatch(updateStudentAsync({ id, formData, token })).then(() => navigate("/"));
+        dispatch(updateStudentAsync({ id, formData, token })).then(() => navigate("/", { state: { page: location.state?.fromPage || 1 } }));
     };
 
     return (
@@ -114,7 +115,7 @@ function UpdateStudent() {
             <div className='d-flex vh-100 justify-content-center align-items-center' style={{ position: 'relative' }}>
                 <div className='w-75 bg-white rounded p-3'>
 
-                    <button className="btn btn-light mb-3" onClick={() => navigate(-1)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <button className="btn btn-light mb-3" onClick={() => navigate(`/`, { state: { page: location.state?.fromPage || 1 } })} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         ← Back
                     </button>
 

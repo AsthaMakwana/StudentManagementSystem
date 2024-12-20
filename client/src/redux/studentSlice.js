@@ -3,39 +3,20 @@ import axios from 'axios';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 
-// export const createStudentAsync = createAsyncThunk(
-//   'students/createStudent',
-//   async ({ formData, token }, { rejectWithValue }) => {
-//     try {
-//       const response = await axios.post(`${API_BASE_URL}/createStudent`, formData, {
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-//       return response.data;
-//     } catch (error) {
-//       return rejectWithValue(error.response?.data || error.message);
-//     }
-//   }
-// );
 export const createStudentAsync = createAsyncThunk(
   'students/createStudent',
   async ({ formData, token }, { rejectWithValue }) => {
     try {
-      // First, check if the email already exists
-      console.log("******", formData.get('email'));
       const email = formData.get('email')
-      
+
       const emailCheckResponse = await axios.post(`${API_BASE_URL}/checkEmail`, { email: email }, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (emailCheckResponse.data.exists) {
-        // If email exists, reject the action with a custom error message
-        console.log("dataexist");
-        
         return rejectWithValue({ email: 'Email already in use' });
       }
 
-      // If email is valid, create the student
       const response = await axios.post(`${API_BASE_URL}/createStudent`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -45,7 +26,6 @@ export const createStudentAsync = createAsyncThunk(
     }
   }
 );
-
 
 
 export const updateStudentAsync = createAsyncThunk(
@@ -63,40 +43,24 @@ export const updateStudentAsync = createAsyncThunk(
 );
 
 
-// export const setStudentAsync = createAsyncThunk('students/getStudents', async ({ currentPage, studentsPerPage, token }) => {
-//   try {
-//     const response = await axios.get("http://localhost:3001/students/get-students", {
-//       headers: {
-//         'Authorization': `Bearer ${token}`,
-//       },
-//       params: {
-//         page: currentPage,
-//         limit: studentsPerPage,
-//       },
-//     });
-//     console.log('heyaa', response.data)
-//     return response.data;
-//   } catch (error) {
-//     console.error('Error fetching students:', error);
-//     throw error;
-//   }
-// });
-export const setStudentAsync = createAsyncThunk('students/getStudents', async ({ currentPage, studentsPerPage, token, searchQuery }) => {
+export const setStudentAsync = createAsyncThunk('students/getStudents', async ({ currentPage, studentsPerPage, token, searchQuery, ageFilter }) => {
   try {
-      const response = await axios.get("http://localhost:3001/students/get-students", {
-          headers: {
-              'Authorization': `Bearer ${token}`,
-          },
-          params: {
-              page: currentPage,
-              limit: studentsPerPage,
-              searchQuery
-          },
-      });
-      return response.data;
+    const response = await axios.get("http://localhost:3001/students/get-students", {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      params: {
+        page: currentPage,
+        limit: studentsPerPage,
+        searchQuery,
+        //
+        ageFilter
+      },
+    });
+    return response.data;
   } catch (error) {
-      console.error('Error fetching students:', error);
-      throw error;
+    console.error('Error fetching students:', error);
+    throw error;
   }
 });
 
@@ -210,21 +174,13 @@ const studentSlice = createSlice({
       })
 
 
-      // .addCase(deleteStudentAsync.fulfilled, (state, action) => {
-      //   state.students = state.students.students.filter(student => student._id !== action.payload);
-      // })
       .addCase(deleteStudentAsync.fulfilled, (state, action) => {
         const updatedStudents = state.students.students.filter(student => student._id !== action.payload);
-    
-        // Update the current state with the filtered students
         state.students.students = updatedStudents;
-    
-        // Adjust total pages if the current page becomes empty
         if (updatedStudents.length === 0 && state.totalPages > 1) {
-            state.totalPages -= 1;
+          state.totalPages -= 1;
         }
-    })
-    
+      })
       .addCase(deleteStudentAsync.rejected, (state, action) => {
         state.error = action.error.message;
       })
