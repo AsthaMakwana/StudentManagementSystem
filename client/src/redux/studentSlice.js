@@ -32,6 +32,16 @@ export const updateStudentAsync = createAsyncThunk(
   'students/updateStudent',
   async ({ id, formData, token }, { rejectWithValue }) => {
     try {
+      //
+      const email = formData.get('email');
+      const emailCheckResponse = await axios.post(`${API_BASE_URL}/checkEmail`, { email: email, studentId: id }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (emailCheckResponse.data.exists) {
+        return rejectWithValue({ email: 'Email already in use' });
+      }
+
       const response = await axios.put(`${API_BASE_URL}/updateStudent/${id}`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });

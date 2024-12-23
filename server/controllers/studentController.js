@@ -136,16 +136,23 @@ exports.deleteStudent = (req, res) => {
         .catch(err => res.status(500).json({ message: 'Error deleting student', error: err }));
 };
 
-exports.checkEmail = (req, res) => {
-    const { email } = req.body;
-    StudentModel.findOne({ email: email })
+exports.checkEmail = async (req, res) => {
+    const { email, studentId } = req.body; 
     
-        .then(student => {
-            if (student) {
-                res.json({ exists: true });
-            } else {
-                res.json({ exists: false });
-            }
-        })
-        .catch(err => res.status(500).json({ error: 'Internal Server Error', details: err }));
+    try {
+        let student;
+        if (studentId) {
+            student = await StudentModel.findOne({ email, _id: { $ne: studentId } }); 
+        } else {
+            student = await StudentModel.findOne({ email });
+        }
+
+        if (student) {
+            return res.status(400).json({ exists: true });
+        }
+        return res.status(200).json({ exists: false });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
 };
+

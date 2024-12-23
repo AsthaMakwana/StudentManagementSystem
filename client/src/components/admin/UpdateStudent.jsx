@@ -80,6 +80,27 @@ function UpdateStudent() {
 
     const Update = (e) => {
         e.preventDefault();
+
+        const studentData = { name, surname, birthdate, rollno, address, email, age, profilePicture };
+        
+        const isUnchanged = Object.keys(studentData).every(key => {
+            if (key === "birthdate") {
+                return new Date(studentData[key]).toLocaleDateString() === new Date(student[key]).toLocaleDateString();
+            }
+            if (key === "profilePicture") {
+                return studentData[key]?.split('/').pop() === student[key]?.split('/').pop();
+            }
+            return studentData[key] === student[key];
+        });
+        
+        console.log('un', isUnchanged);
+        
+
+        if (isUnchanged) {
+            toast.info('No changes detected.');
+            return;
+        }
+
         const { error } = studentSchema.validate(
             { name, surname, birthdate, rollno, address, email, age },
             { abortEarly: false }
@@ -107,6 +128,7 @@ function UpdateStudent() {
         if (selectedFile) formData.append("profilePicture", selectedFile);
 
         dispatch(updateStudentAsync({ id, formData, token }))
+            .unwrap()
             .then(() => {
                 toast.success('Student updated successfully!');
                 setTimeout(() => {
@@ -114,6 +136,18 @@ function UpdateStudent() {
                 }, 2000);
 
             })
+            .catch((error) => {
+                console.error(error);
+                if (error.exists) {
+                    setErrors((prevErrors) => ({
+                        ...prevErrors,
+                        email: "Email is already in use"
+                    }));
+                } else {
+                    console.error('Unexpected error:', error);
+                }
+            });
+
     };
 
     return (
@@ -129,7 +163,7 @@ function UpdateStudent() {
                     <form onSubmit={Update} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
 
                         <ToastContainer />
-                        
+
                         <h2 style={{ textAlign: 'center', gridColumn: 'span 2' }}>Update Student</h2>
 
                         <div className='mb-2'>
