@@ -20,6 +20,9 @@ function Students() {
     const [studentsPerPage] = useState(5);
     const [ageFilter, setAgeFilter] = useState('');
 
+    //
+    const [selectedStudentIds, setSelectedStudentIds] = useState([]);
+
     const students = useSelector(state => state.students.students || []);
     const totalPages = useSelector(state => state.students.totalPages);
     const user = useSelector(state => state.auth.user);
@@ -46,6 +49,57 @@ function Students() {
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         return date.toLocaleDateString(undefined, options);
     }
+
+    //
+    const handleSelectStudent = (id) => {
+        setSelectedStudentIds((prev) =>
+            prev.includes(id) ? prev.filter((studentId) => studentId !== id) : [...prev, id]
+        );
+    };
+
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            const visibleIds = students.students.map((student) => student._id);
+            setSelectedStudentIds((prev) => [...new Set([...prev, ...visibleIds])]);
+        } else {
+            const visibleIds = students.students.map((student) => student._id);
+            setSelectedStudentIds((prev) => prev.filter((id) => !visibleIds.includes(id)));
+        }
+    };
+
+    const isAllSelected = () => {
+        const visibleIds = students.students.map((student) => student._id);
+        return visibleIds.every((id) => selectedStudentIds.includes(id));
+    };
+
+    const handleBulkDelete = () => {
+        const token = localStorage.getItem('authToken');
+        if (selectedStudentIds.length > 0) {
+            const isConfirmed = window.confirm(
+                'Are you sure you want to delete selected students?'
+            );
+            if (isConfirmed) {
+                selectedStudentIds.forEach((id) => {
+                    dispatch(deleteStudentAsync({ id, token }));
+                });
+                setTimeout(() => {
+                    toast.success('Selected students deleted successfully!');
+                    setSelectedStudentIds([]);
+                    dispatch(
+                        setStudentAsync({
+                            currentPage,
+                            studentsPerPage,
+                            searchQuery,
+                            ageFilter,
+                            token,
+                        })
+                    );
+                }, 500);
+            }
+        } else {
+            toast.error('No students selected for deletion!');
+        }
+    };
 
     const handleDelete = (id) => {
         const isConfirmed = window.confirm("Are you sure you want to remove this student?");
@@ -92,7 +146,12 @@ function Students() {
                     {user ? (
                         <>
                             {user.role === 'admin' && (
-                                <Link to="/create" state={{ fromPage: currentPage }} className="btn btn-success mb-3">Add Student</Link>
+                                <>
+                                    <Link to="/create" state={{ fromPage: currentPage }} className="btn btn-success mb-3">Add Student</Link>
+                                    <button className="btn btn-danger mb-3" onClick={handleBulkDelete}>
+                                        Delete Selected
+                                    </button>
+                                </>
                             )}
                         </>
                     ) : (
@@ -120,6 +179,13 @@ function Students() {
                         <table className="table text-center">
                             <thead>
                                 <tr>
+                                    <th>
+                                        <input
+                                            type="checkbox"
+                                            onChange={handleSelectAll}
+                                            checked={isAllSelected()}
+                                        />
+                                    </th>
                                     <th>Profile Picture</th>
                                     <th>Name</th>
                                     <th>Roll no</th>
@@ -137,6 +203,13 @@ function Students() {
                             <tbody>
                                 {(students.students || []).map(student => (
                                     <tr key={student._id}>
+                                        <td>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedStudentIds.includes(student._id)}
+                                                onChange={() => handleSelectStudent(student._id)}
+                                            />
+                                        </td>
                                         <td>
                                             {student.profilePicture ? (
                                                 <img src={`http://localhost:3001${student.profilePicture}`} alt="Profile" style={{ width: '50px', height: '50px', borderRadius: '50%' }} />
