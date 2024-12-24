@@ -19,8 +19,6 @@ function Students() {
     const [currentPage, setCurrentPage] = useState(location.state?.page || 1);
     const [studentsPerPage] = useState(5);
     const [ageFilter, setAgeFilter] = useState('');
-
-    //
     const [selectedStudentIds, setSelectedStudentIds] = useState([]);
 
     const students = useSelector(state => state.students.students || []);
@@ -50,7 +48,6 @@ function Students() {
         return date.toLocaleDateString(undefined, options);
     }
 
-    //
     const handleSelectStudent = (id) => {
         setSelectedStudentIds((prev) =>
             prev.includes(id) ? prev.filter((studentId) => studentId !== id) : [...prev, id]

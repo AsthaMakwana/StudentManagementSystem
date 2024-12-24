@@ -92,9 +92,6 @@ function UpdateStudent() {
             }
             return studentData[key] === student[key];
         });
-        
-        console.log('un', isUnchanged);
-        
 
         if (isUnchanged) {
             toast.info('No changes detected.');
