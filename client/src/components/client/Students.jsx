@@ -9,6 +9,9 @@ import '../../assets/client/Students.css';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+//
+import StudentDetailsModal from './StudentDetailsModal';
+
 function Students() {
 
     const location = useLocation();
@@ -20,6 +23,7 @@ function Students() {
     const [studentsPerPage] = useState(5);
     const [ageFilter, setAgeFilter] = useState('');
     const [selectedStudentIds, setSelectedStudentIds] = useState([]);
+    const [selectedStudent, setSelectedStudent] = useState(null);
 
     const students = useSelector(state => state.students.students || []);
     const totalPages = useSelector(state => state.students.totalPages);
@@ -80,7 +84,6 @@ function Students() {
                     dispatch(deleteStudentAsync({ id, token }));
                 });
                 setTimeout(() => {
-                    toast.success('Selected students deleted successfully!');
                     setSelectedStudentIds([]);
                     dispatch(
                         setStudentAsync({
@@ -91,6 +94,7 @@ function Students() {
                             token,
                         })
                     );
+                    navigate("/", { state: { page: location.state?.fromPage || 1 } });
                 }, 500);
             }
         } else {
@@ -119,6 +123,10 @@ function Students() {
         } else {
             console.log("Deletion canceled.");
         }
+    };
+
+    const handleShowStudentDetails = (student) => {
+        setSelectedStudent(student); // Set selected student to show in modal
     };
 
     const paginate = (pageNumber) => {
@@ -177,7 +185,7 @@ function Students() {
                             <thead>
                                 <tr>
                                     <th>
-                                        <input type="checkbox" onChange={handleSelectAll} checked={isAllSelected()} />
+                                        <input type="checkbox" onChange={handleSelectAll} checked={isAllSelected()}/>
                                     </th>
                                     <th>Profile Picture</th>
                                     <th>Name</th>
@@ -215,11 +223,13 @@ function Students() {
                                                         <FaEdit size={20} style={{ color: 'black' }} />
                                                     </button>
                                                 </Link>
-                                                <Link to={`/details/${student._id}`} state={{ fromPage: currentPage }}>
-                                                    <button className="btn btn-light" title="Details">
-                                                        <FiInfo size={20} style={{ color: 'black' }} />
-                                                    </button>
-                                                </Link>
+                                                <button
+                                                    className='btn btn-light me-2'
+                                                    title="More Info"
+                                                    onClick={() => handleShowStudentDetails(student)}
+                                                >
+                                                    <FiInfo size={20} />
+                                                </button>
                                                 <button className='btn btn-light me-2' onClick={() => handleDelete(student._id)} title="Delete">
                                                     <FaTrash size={20} style={{ color: 'black' }} />
                                                 </button>
@@ -250,6 +260,7 @@ function Students() {
                     </nav>
                 </div>
             </div>
+            <StudentDetailsModal student={selectedStudent} closeModal={() => setSelectedStudent(null)} />
         </div>
     )
 }

@@ -88,7 +88,8 @@ function UpdateStudent() {
                 return new Date(studentData[key]).toLocaleDateString() === new Date(student[key]).toLocaleDateString();
             }
             if (key === "profilePicture") {
-                return studentData[key]?.split('/').pop() === student[key]?.split('/').pop();
+                // return studentData[key]?.split('/').pop() === student[key]?.split('/').pop();
+                return selectedFile === null && studentData[key] === student[key];
             }
             return studentData[key] === student[key];
         });
