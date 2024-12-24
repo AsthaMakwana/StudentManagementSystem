@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux'; 
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { logout } from '../../redux/authSlice';
 
@@ -15,24 +15,26 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-light bg-light">
+        <nav className="navbar navbar-expand-lg shadow-sm" style={{ backgroundColor: "#ffffff", padding: "1rem 1.5rem", borderBottom: "2px solid #f0f0f0" }}>
             <div className="container-fluid">
-                <div className="d-flex w-100 align-items-center justify-content-between">
+                <div className="d-flex w-100 align-items-center">
 
                     {user ? (
                         <>
-                            <span className="navbar-text me-3">
-                                Welcome, {user.username}
-                            </span>
+                            <span className="navbar-text" style={{ fontSize: "1rem", fontWeight: "bold", color: "#333333" }}> Welcome, {user.username}</span>
 
-                            <button className="btn btn-danger" onClick={handleLogout}>
-                                Logout
-                            </button>
+                            <div style={{ marginLeft: "auto" }}>
+                                <button className="btn btn-outline-dark" onClick={handleLogout} style={{ padding: "0.5rem 1.5rem", borderRadius: "30px", fontWeight: "bold", fontSize: "0.9rem" }}>
+                                    Logout
+                                </button>
+                            </div>
                         </>
                     ) : (
-                        <Link to="/login" className="btn btn-primary">
-                            Login
-                        </Link>
+                        <div style={{ marginLeft: "auto" }}>
+                            <Link to="/login" className="btn btn-dark" style={{ padding: "0.5rem 1.5rem", borderRadius: "30px", fontWeight: "bold", fontSize: "0.9rem" }}>
+                                Login
+                            </Link>
+                        </div>
                     )}
                 </div>
             </div>

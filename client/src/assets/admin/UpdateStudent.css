@@ -1,4 +1,4 @@
-.d-flex::before {
+.bg-overlay::before {
     content: "";
     position: absolute;
     top: 0;
@@ -8,6 +8,17 @@
     background-image: url("https://www.oxfordlearning.com/wp-content/uploads/2018/09/how-to-help-your-child-focus-in-school-860x420.jpeg");
     background-size: cover;
     background-repeat: no-repeat;
-    opacity: 0.5; 
-    z-index: -1; 
-}
+    background-position: center;
+    filter: blur(5px) brightness(0.8);
+    z-index: -1;
+  }
+  
+  .card {
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-label {
+    color: #6c757d;
+  }
+  

@@ -62,7 +62,7 @@ const LoginSignup = () => {
 
   return (
 
-    <div className="container">
+    <div className="container w-50">
       <div className={`login form ${isLoginMode ? 'active' : ''}`}>
         <header>Login</header>
 

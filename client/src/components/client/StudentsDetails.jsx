@@ -33,31 +33,34 @@ function StudentsDetails() {
     return (
         <div>
             <Navbar />
-            <div className='d-flex vh-100 justify-content-center align-items-center' style={{ position: 'relative' }}>
-                <div className='w-75 bg-white rounded p-3'>
+            <div className="student-details-container d-flex vh-100 justify-content-center align-items-center">
+                <div className="details-card w-50 bg-light shadow-lg rounded p-4">
 
-                    <button className="btn btn-light mb-3" onClick={() => navigate(`/`, { state: { page: location.state?.fromPage || 1 } })} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <button className="btn btn-outline-dark mb-4 back-button" onClick={() => navigate(`/`, { state: { page: location.state?.fromPage || 1 } })}>
                         ← Back
                     </button>
 
-                    <h2 className="text-center">Student Details</h2>
+                    <h2 className="text-center mb-4">Student Details</h2>
 
-                    <div className="card">
+                    <div className="card shadow border-0">
                         <div className="card-body">
-                            <div className="mb-3">
-                                <strong>Profile Picture:</strong>
+                            <div className="profile-picture mb-4 text-center">
                                 {student.profilePicture ? (
-                                    <img src={`http://localhost:3001${student.profilePicture}`} alt="Profile" style={{ width: '50px', height: '50px', borderRadius: '50%' }} />
+                                    <img src={`http://localhost:3001${student.profilePicture}`} alt="Profile" className="img-thumbnail rounded-circle" style={{ width: '100px', height: '100px' }} />
                                 ) : (
-                                    <span>No Image</span>
+                                    <div className="no-image">No Image</div>
                                 )}
                             </div>
-                            <h3 className="card-title">Name: {student.name} {student.surname}</h3>
-                            <p className="card-text"><strong>Roll No:</strong> {student.rollno}</p>
-                            <p className="card-text"><strong>Age:</strong> {student.age}</p>
-                            <p className="card-text"><strong>Birthdate:</strong> {new Date(student.birthdate).toLocaleDateString()}</p>
-                            <p className="card-text"><strong>Email:</strong> {student.email}</p>
-                            <p className="card-text"><strong>Address:</strong> {student.address}</p>
+                            <h3 className="card-title">
+                                {student.name} {student.surname}
+                            </h3>
+                            <div className="info-section mt-3">
+                                <p><strong>Roll No:</strong> {student.rollno}</p>
+                                <p><strong>Age:</strong> {student.age}</p>
+                                <p><strong>Birthdate:</strong> {new Date(student.birthdate).toLocaleDateString()}</p>
+                                <p><strong>Email:</strong> {student.email}</p>
+                                <p><strong>Address:</strong> {student.address}</p>
+                            </div>
                         </div>
                     </div>
                 </div>

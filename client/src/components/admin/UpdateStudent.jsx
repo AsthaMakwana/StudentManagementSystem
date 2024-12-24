@@ -82,7 +82,7 @@ function UpdateStudent() {
         e.preventDefault();
 
         const studentData = { name, surname, birthdate, rollno, address, email, age, profilePicture };
-        
+
         const isUnchanged = Object.keys(studentData).every(key => {
             if (key === "birthdate") {
                 return new Date(studentData[key]).toLocaleDateString() === new Date(student[key]).toLocaleDateString();
@@ -150,70 +150,64 @@ function UpdateStudent() {
     return (
         <div>
             <Navbar />
-            <div className='d-flex vh-100 justify-content-center align-items-center' style={{ position: 'relative' }}>
-                <div className='w-75 bg-white rounded p-3'>
+            <div className='d-flex vh-70 justify-content-center align-items-center bg-overlay mt-5'>
+                <div className="card shadow-lg rounded-3 p-4" style={{ width: "90%", maxWidth: "800px", background: "rgba(255, 255, 255, 0.9)" }}>
 
-                    <button className="btn btn-light mb-3" onClick={() => navigate(`/`, { state: { page: location.state?.fromPage || 1 } })} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        ← Back
+                    <button className="btn btn-outline-primary mb-4 w-25" onClick={() => navigate(`/`, { state: { page: location.state?.fromPage || 1 } })}
+                        style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}> ← Back
                     </button>
 
-                    <form onSubmit={Update} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-
+                    <form onSubmit={Update} className="row g-4">
                         <ToastContainer />
 
-                        <h2 style={{ textAlign: 'center', gridColumn: 'span 2' }}>Update Student</h2>
+                        <h2 className="text-center text-primary fw-bold mb-3">Update Student</h2>
 
-                        <div className='mb-2'>
+                        <div className='col-md-6'>
                             <label htmlFor="">Name : </label>
                             <input type="text" name="name" className="form-control" placeholder='Enter Name' value={name} onChange={(e) => setName(e.target.value)} />
-                            {errors.name && <div className="alert alert-danger" style={{ fontSize: '0.9rem', padding: '0.5rem' }}>{errors.name}</div>}
+                            {errors.name && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.name}</div>}
                         </div>
 
-                        <div className='mb-2'>
+                        <div className='col-md-6'>
                             <label htmlFor="">Surname : </label>
                             <input type="text" name="surname" className="form-control" placeholder='Enter Surname' value={surname} onChange={(e) => setSurname(e.target.value)} />
-                            {errors.surname && <div className="alert alert-danger" style={{ fontSize: '0.9rem', padding: '0.5rem' }}>{errors.surname}</div>}
+                            {errors.surname && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.surname}</div>}
                         </div>
 
-                        <div className='mb-2'>
+                        <div className='col-md-6'>
                             <label htmlFor="">Birthdate : </label>
                             <input type="date" name="birthdate" className="form-control" placeholder='Enter Birthdate' value={birthdate} onChange={(e) => setBirthdate(e.target.value)} />
-                            {errors.birthdate && <div className="alert alert-danger" style={{ fontSize: '0.9rem', padding: '0.5rem' }}>{errors.birthdate}</div>}
+                            {errors.birthdate && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.birthdate}</div>}
                         </div>
 
-                        <div className='mb-2'>
+                        <div className='col-md-6'>
                             <label htmlFor="">Roll no : </label>
                             <input type="number" name="rollno" className="form-control" placeholder='Enter Rollno' value={rollno} onChange={(e) => setRollno(e.target.value)} />
-                            {errors.rollno && <div className="alert alert-danger" style={{ fontSize: '0.9rem', padding: '0.5rem' }}>{errors.rollno}</div>}
+                            {errors.rollno && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.rollno}</div>}
                         </div>
 
-                        <div className='mb-2'>
+                        <div className='col-md-6'>
                             <label htmlFor="">Address : </label>
                             <textarea type="text" name="address" className="form-control" placeholder='Enter Address' value={address} onChange={(e) => setAddress(e.target.value)} />
-                            {errors.address && <div className="alert alert-danger" style={{ fontSize: '0.9rem', padding: '0.5rem' }}>{errors.address}</div>}
+                            {errors.address && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.address}</div>}
                         </div>
 
-                        <div className='mb-2'>
+                        <div className='col-md-6'>
                             <label htmlFor="">Email : </label>
                             <input type="email" name="email" className="form-control" placeholder='Enter Email' value={email} onChange={(e) => setEmail(e.target.value)} />
-                            {errors.email && <div className="alert alert-danger" style={{ fontSize: '0.9rem', padding: '0.5rem' }}>{errors.email}</div>}
+                            {errors.email && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.email}</div>}
                         </div>
 
-                        <div className='mb-2'>
+                        <div className='col-md-6'>
                             <label htmlFor="">Age : </label>
                             <input type="number" name="age" className="form-control" placeholder='Enter Age' value={age} readOnly />
-                            {errors.age && <div className="alert alert-danger" style={{ fontSize: '0.9rem', padding: '0.5rem' }}>{errors.age}</div>}
+                            {errors.age && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.age}</div>}
                         </div>
 
-                        <div className="mb-2">
+                        <div className="col-12">
                             <label>Profile Picture: </label>
                             <div className="custom-file-input">
-                                <input
-                                    type="file"
-                                    className="form-control"
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                />
+                                <input type="file" className="form-control" accept="image/*" onChange={handleFileChange}/>
                                 {profilePicture && !selectedFile && (
                                     <div>Current Profile Picture: {profilePicture.split('/').pop()}</div>
                                 )}
@@ -222,7 +216,12 @@ function UpdateStudent() {
                                 )}
                             </div>
                         </div>
-                        <button className='btn btn-success' style={{ gridColumn: 'span 2' }}>Update</button>
+
+                        <div className="col-12 text-center">
+                            <button className="btn btn-primary w-50 fw-bold py-2" style={{ fontSize: "1.1rem" }}>
+                                Update
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>

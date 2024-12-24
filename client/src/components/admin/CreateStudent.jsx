@@ -109,69 +109,70 @@ function CreateStudent() {
     return (
         <div>
             <Navbar />
-            <div className='d-flex vh-100 justify-content-center align-items-center' style={{ position: 'relative' }}>
-                <div className='w-75 bg-white rounded p-3'>
+            <div className="d-flex vh-70 justify-content-center align-items-center bg-overlay mt-5">
+                <div className="card shadow-lg rounded-3 p-4" style={{ width: "90%", maxWidth: "800px", background: "rgba(255, 255, 255, 0.9)" }}>
 
-                    <button className="btn btn-light mb-3" onClick={() => navigate(`/`, { state: { page: location.state?.fromPage || 1 } })} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        ← Back
+                    <button className="btn btn-outline-primary mb-4 w-25" onClick={() => navigate(`/`, { state: { page: location.state?.fromPage || 1 } })}
+                        style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}> ← Back
                     </button>
 
-                    <form onSubmit={Submit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-
+                    <form onSubmit={Submit} className="row g-4">
                         <ToastContainer />
-                        
-                        <h2 style={{ textAlign: 'center', gridColumn: 'span 2' }}>Add Student</h2>
+                        <h2 className="text-center text-primary fw-bold mb-3">Add Student</h2>
 
-                        <div className='mb-2'>
-                            <label htmlFor="">Name : </label>
-                            <input type="text" name="name" className="form-control" placeholder='Enter Name' onChange={(e) => setName(e.target.value)} />
-                            {errors.name && <div className="alert alert-danger" style={{ fontSize: '0.9rem', padding: '0.5rem' }}>{errors.name}</div>}
+                        <div className="col-md-6">
+                            <label htmlFor="name" className="form-label fw-bold text-secondary"> Name: </label>
+                            <input type="text" name="name" className="form-control" placeholder="Enter Name" onChange={(e) => setName(e.target.value)}/>
+                            {errors.name && (<div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.name}</div>)}
                         </div>
 
-                        <div className='mb-2'>
-                            <label htmlFor="">Surname : </label>
-                            <input type="text" name="surname" className="form-control" placeholder='Enter Surname' onChange={(e) => setSurname(e.target.value)} />
-                            {errors.surname && <div className="alert alert-danger" style={{ fontSize: '0.9rem', padding: '0.5rem' }}> {errors.surname}</div>}
+                        <div className="col-md-6">
+                            <label htmlFor="surname" className="form-label fw-bold text-secondary"> Surname: </label>
+                            <input type="text" name="surname" className="form-control" placeholder="Enter Surname" onChange={(e) => setSurname(e.target.value)}/>
+                            {errors.surname && (<div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.surname}</div>)}
                         </div>
 
-                        <div className='mb-2'>
-                            <label htmlFor="">Birthdate : </label>
-                            <input type="date" name="birthdate" className="form-control" placeholder='Enter Birthdate' onChange={(e) => setBirthdate(e.target.value)} />
-                            {errors.birthdate && <div className="alert alert-danger" style={{ fontSize: '0.9rem', padding: '0.5rem' }}>{errors.birthdate}</div>}
+                        <div className="col-md-6">
+                            <label htmlFor="birthdate" className="form-label fw-bold text-secondary"> Birthdate: </label>
+                            <input type="date" name="birthdate" className="form-control" onChange={(e) => setBirthdate(e.target.value)}/>
+                            {errors.birthdate && (<div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.birthdate}</div>)}
                         </div>
 
-                        <div className='mb-2'>
-                            <label htmlFor="">Roll no : </label>
-                            <input type="number" name="rollno" className="form-control" placeholder='Enter Rollno' onChange={(e) => setRollno(e.target.value)} />
-                            {errors.rollno && <div className="alert alert-danger" style={{ fontSize: '0.9rem', padding: '0.5rem' }}>{errors.rollno}</div>}
+                        <div className="col-md-6">
+                            <label htmlFor="rollno" className="form-label fw-bold text-secondary"> Roll No: </label>
+                            <input type="number" name="rollno" className="form-control" placeholder="Enter Roll No" onChange={(e) => setRollno(e.target.value)}/>
+                            {errors.rollno && (<div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.rollno}</div>)}
                         </div>
 
-                        <div className='mb-2'>
-                            <label htmlFor="">Address : </label>
-                            <textarea type="text" name="address" className="form-control" placeholder='Enter Address' onChange={(e) => setAddress(e.target.value)} />
-                            {errors.address && <div className="alert alert-danger" style={{ fontSize: '0.9rem', padding: '0.5rem' }}>{errors.address}</div>}
+                        <div className="col-12">
+                            <label htmlFor="address" className="form-label fw-bold text-secondary"> Address: </label>
+                            <textarea name="address" className="form-control" placeholder="Enter Address" onChange={(e) => setAddress(e.target.value)}></textarea>
+                            {errors.address && (<div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.address}</div>)}
                         </div>
 
-                        <div className='mb-2'>
-                            <label htmlFor="">Email : </label>
-                            <input type="email" name="email" className="form-control" placeholder='Enter Email' onChange={(e) => setEmail(e.target.value)} />
-                            {errors.email && <div className="alert alert-danger" style={{ fontSize: '0.9rem', padding: '0.5rem' }}>{errors.email}</div>}
+                        <div className="col-md-6">
+                            <label htmlFor="email" className="form-label fw-bold text-secondary"> Email: </label>
+                            <input type="email" name="email" className="form-control" placeholder="Enter Email" onChange={(e) => setEmail(e.target.value)}/>
+                            {errors.email && (<div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.email}</div>)}
                         </div>
 
-                        <div className='mb-2'>
-                            <label htmlFor="">Age : </label>
-                            <input type="number" name="age" className="form-control" value={age || ''} readOnly />
-                            {errors.age && <div className="alert alert-danger" style={{ fontSize: '0.9rem', padding: '0.5rem' }}>{errors.age}</div>}
+                        <div className="col-md-6">
+                            <label htmlFor="age" className="form-label fw-bold text-secondary"> Age: </label>
+                            <input type="number" name="age" className="form-control" value={age || ""} readOnly/>
+                            {errors.age && (<div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.age}</div>)}
                         </div>
 
-                        <div className='mb-2'>
-                            <label htmlFor="">Profile Picture : </label>
-                            <input type="file" className="form-control" accept="image/*" onChange={handleFileChange} />
-                            {profilePicture && <div>Selected: {profilePicture.name}</div>}
+                        <div className="col-12">
+                            <label htmlFor="profilePicture" className="form-label fw-bold text-secondary"> Profile Picture: </label>
+                            <input type="file" className="form-control" accept="image/*" onChange={handleFileChange}/>
+                            {profilePicture && (<small className="text-muted mt-1"> Selected: {profilePicture.name}</small>)}
                         </div>
 
-                        <button className='btn btn-success' style={{ gridColumn: 'span 2' }}>Submit</button>
-
+                        <div className="col-12 text-center">
+                            <button className="btn btn-primary w-50 fw-bold py-2" style={{ fontSize: "1.1rem" }}>
+                                Submit
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>

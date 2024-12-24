@@ -1,4 +1,9 @@
-.d-flex::before {
+.student-details-container {
+    position: relative;
+    padding: 2rem;
+}
+
+.student-details-container::before {
     content: "";
     position: absolute;
     top: 0;
@@ -10,4 +15,34 @@
     background-repeat: no-repeat;
     opacity: 0.5;
     z-index: -1;
+}
+
+.details-card {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.profile-picture img {
+    border: 3px solid #555;
+}
+
+.info-section p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 0.5rem;
+}
+
+.loading-container, .error-container {
+    font-size: 1.5rem;
+    color: #6c757d;
+    text-align: center;
+    margin-top: 2rem;
 }

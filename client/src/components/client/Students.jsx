@@ -145,7 +145,7 @@ function Students() {
                             {user.role === 'admin' && (
                                 <>
                                     <Link to="/create" state={{ fromPage: currentPage }} className="btn btn-success mb-3">Add Student</Link>
-                                    <button className="btn btn-danger mb-3" onClick={handleBulkDelete}>
+                                    <button className="btn btn-danger mb-3 ms-3" onClick={handleBulkDelete}>
                                         Delete Selected
                                     </button>
                                 </>
@@ -177,11 +177,7 @@ function Students() {
                             <thead>
                                 <tr>
                                     <th>
-                                        <input
-                                            type="checkbox"
-                                            onChange={handleSelectAll}
-                                            checked={isAllSelected()}
-                                        />
+                                        <input type="checkbox" onChange={handleSelectAll} checked={isAllSelected()} />
                                     </th>
                                     <th>Profile Picture</th>
                                     <th>Name</th>
@@ -201,11 +197,7 @@ function Students() {
                                 {(students.students || []).map(student => (
                                     <tr key={student._id}>
                                         <td>
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedStudentIds.includes(student._id)}
-                                                onChange={() => handleSelectStudent(student._id)}
-                                            />
+                                            <input type="checkbox" checked={selectedStudentIds.includes(student._id)} onChange={() => handleSelectStudent(student._id)} />
                                         </td>
                                         <td>
                                             {student.profilePicture ? (
