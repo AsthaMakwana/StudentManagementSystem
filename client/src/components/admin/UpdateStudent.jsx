@@ -8,6 +8,7 @@ import { updateStudentAsync, getStudentByIdAsync } from '../../redux/studentSlic
 import '../../assets/admin/CreateStudent.css';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useForm } from 'react-hook-form';
 
 function UpdateStudent() {
 
@@ -17,25 +18,22 @@ function UpdateStudent() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const [name, setName] = useState();
-    const [surname, setSurname] = useState();
-    const [birthdate, setBirthdate] = useState();
-    const [rollno, setRollno] = useState();
-    const [address, setAddress] = useState();
-    const [email, setEmail] = useState();
-    const [age, setAge] = useState();
-    const [errors, setErrors] = useState({});
     const [profilePicture, setProfilePicture] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
 
+    const { register, handleSubmit, setValue, formState: { errors }, watch, setError, getValues } = useForm();
+    const birthdate = watch("birthdate");
+    const watchedData = watch();
+    const initialData = student;
+
     const studentSchema = Joi.object({
-        name: Joi.string().min(3).max(30).required(),
-        surname: Joi.string().min(3).max(30).required(),
-        birthdate: Joi.date().required(),
-        rollno: Joi.number().integer().min(1).required(),
-        address: Joi.string().min(5).required(),
-        email: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)).required(),
-        age: Joi.number().integer().min(1).required(),
+        name: Joi.string().min(3).max(30).required().messages({ 'string.empty': 'Name is required', 'string.min': 'Name must be at least 3 characters long', 'any.required': 'Name is required' }),
+        surname: Joi.string().min(3).max(30).required().messages({ 'string.empty': 'Surname is required', 'string.min': 'Surname must be at least 3 characters long', 'any.required': 'Surname is required' }),
+        birthdate: Joi.date().required().messages({ 'date.base': 'Birthdate is required', 'any.required': 'Birthdate is required' }),
+        rollno: Joi.number().integer().min(1).required().messages({ 'number.base': 'Roll number is required', 'number.empty': 'Roll number is required', 'number.min': 'Roll number must be at least 1', 'any.required': 'Roll number is required' }),
+        address: Joi.string().min(5).required().messages({ 'string.empty': 'Address is required', 'string.min': 'Address must be at least 5 characters long', 'any.required': 'Address is required' }),
+        email: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)).required().messages({ 'string.pattern.base': 'Email must be valid', 'string.empty': 'Email is required', 'any.required': 'Email is required' }),
+        age: Joi.number().integer().min(1).required().messages({ 'number.base': 'Age is required', 'number.empty': 'Age is required', 'number.min': 'Age must be at least 1', 'any.required': 'Age is required' }),
     });
 
     useEffect(() => {
@@ -45,16 +43,16 @@ function UpdateStudent() {
 
     useEffect(() => {
         if (student) {
-            setName(student.name);
-            setSurname(student.surname);
-            setBirthdate(new Date(student.birthdate).toLocaleDateString('en-CA'));
-            setRollno(student.rollno);
-            setAddress(student.address);
-            setEmail(student.email);
-            setAge(student.age);
+            setValue("name", student.name);
+            setValue("surname", student.surname);
+            setValue("birthdate", new Date(student.birthdate).toLocaleDateString('en-CA'));
+            setValue("rollno", student.rollno);
+            setValue("address", student.address);
+            setValue("email", student.email);
+            setValue("age", student.age);
             setProfilePicture(student.profilePicture);
         }
-    }, [student]);
+    }, [student, setValue]);
 
     const calculateAge = (birthdate) => {
         const birthDate = new Date(birthdate);
@@ -69,38 +67,32 @@ function UpdateStudent() {
 
     useEffect(() => {
         if (birthdate) {
-            setAge(calculateAge(birthdate));
+            setValue("age", calculateAge(birthdate));
         }
-    }, [birthdate])
+    }, [birthdate, setValue]);
 
     const handleFileChange = (e) => {
         setSelectedFile(e.target.files[0]);
         setProfilePicture(null);
     };
 
-    const Update = (e) => {
-        e.preventDefault();
-
-        const studentData = { name, surname, birthdate, rollno, address, email, age, profilePicture };
-
-        const isUnchanged = Object.keys(studentData).every(key => {
+    const onSubmit = (data) => {
+        
+        const isUnchanged = Object.keys(watchedData).every((key) => {
             if (key === "birthdate") {
-                return new Date(studentData[key]).toLocaleDateString() === new Date(student[key]).toLocaleDateString();
+                return new Date(watchedData[key]).toLocaleDateString() === new Date(initialData[key]).toLocaleDateString();
             }
             if (key === "profilePicture") {
-                // return studentData[key]?.split('/').pop() === student[key]?.split('/').pop();
-                return selectedFile === null && studentData[key] === student[key];
+                return selectedFile === null && watchedData[key] === initialData[key];
             }
-            return studentData[key] === student[key];
+            return watchedData[key] === initialData[key];
         });
-
         if (isUnchanged) {
             toast.info('No changes detected.');
             return;
         }
-
         const { error } = studentSchema.validate(
-            { name, surname, birthdate, rollno, address, email, age },
+            data,
             { abortEarly: false }
         );
 
@@ -109,20 +101,18 @@ function UpdateStudent() {
                 acc[curr.path[0]] = curr.message;
                 return acc;
             }, {});
-            setErrors(newErrors);
+            for (const field in newErrors) {
+                setError(field, { message: newErrors[field] });
+            }
             return;
         }
-        setErrors({});
 
         const token = localStorage.getItem('authToken');
         const formData = new FormData();
-        formData.append("name", name);
-        formData.append("surname", surname);
-        formData.append("birthdate", birthdate);
-        formData.append("rollno", rollno);
-        formData.append("address", address);
-        formData.append("email", email);
-        formData.append("age", age);
+
+        Object.entries(data).forEach(([key, value]) => {
+            formData.append(key, value);
+        });
         if (selectedFile) formData.append("profilePicture", selectedFile);
 
         dispatch(updateStudentAsync({ id, formData, token }))
@@ -137,10 +127,7 @@ function UpdateStudent() {
             .catch((error) => {
                 console.error(error);
                 if (error.exists) {
-                    setErrors((prevErrors) => ({
-                        ...prevErrors,
-                        email: "Email is already in use"
-                    }));
+                    setError("email", { message: 'Email is already taken' });
                 } else {
                     console.error('Unexpected error:', error);
                 }
@@ -149,8 +136,10 @@ function UpdateStudent() {
     };
 
     return (
+
         <div>
             <Navbar />
+
             <div className='d-flex vh-70 justify-content-center align-items-center bg-overlay mt-5'>
                 <div className="card shadow-lg rounded-3 p-4" style={{ width: "90%", maxWidth: "800px", background: "rgba(255, 255, 255, 0.9)" }}>
 
@@ -158,57 +147,57 @@ function UpdateStudent() {
                         style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}> ← Back
                     </button>
 
-                    <form onSubmit={Update} className="row g-4">
+                    <form onSubmit={handleSubmit(onSubmit)} className="row g-4">
                         <ToastContainer />
 
                         <h2 className="text-center text-primary fw-bold mb-3">Update Student</h2>
 
                         <div className='col-md-6'>
                             <label htmlFor="">Name : </label>
-                            <input type="text" name="name" className="form-control" placeholder='Enter Name' value={name} onChange={(e) => setName(e.target.value)} />
-                            {errors.name && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.name}</div>}
+                            <input type="text" {...register("name")} className="form-control" placeholder='Enter Name' />
+                            {errors.name && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.name.message}</div>}
                         </div>
 
                         <div className='col-md-6'>
                             <label htmlFor="">Surname : </label>
-                            <input type="text" name="surname" className="form-control" placeholder='Enter Surname' value={surname} onChange={(e) => setSurname(e.target.value)} />
-                            {errors.surname && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.surname}</div>}
+                            <input type="text" {...register("surname")} className="form-control" placeholder='Enter Surname' />
+                            {errors.surname && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.surname.message}</div>}
                         </div>
 
                         <div className='col-md-6'>
                             <label htmlFor="">Birthdate : </label>
-                            <input type="date" name="birthdate" className="form-control" placeholder='Enter Birthdate' value={birthdate} onChange={(e) => setBirthdate(e.target.value)} />
-                            {errors.birthdate && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.birthdate}</div>}
+                            <input type="date" {...register("birthdate")} className="form-control" placeholder='Enter Birthdate' />
+                            {errors.birthdate && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.birthdate.message}</div>}
                         </div>
 
                         <div className='col-md-6'>
                             <label htmlFor="">Roll no : </label>
-                            <input type="number" name="rollno" className="form-control" placeholder='Enter Rollno' value={rollno} onChange={(e) => setRollno(e.target.value)} />
-                            {errors.rollno && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.rollno}</div>}
+                            <input type="number" {...register("rollno")} className="form-control" placeholder='Enter Rollno' />
+                            {errors.rollno && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.rollno.message}</div>}
                         </div>
 
                         <div className='col-md-6'>
                             <label htmlFor="">Address : </label>
-                            <textarea type="text" name="address" className="form-control" placeholder='Enter Address' value={address} onChange={(e) => setAddress(e.target.value)} />
-                            {errors.address && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.address}</div>}
+                            <textarea type="text" {...register("address")} className="form-control" placeholder='Enter Address' />
+                            {errors.address && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.address.message}</div>}
                         </div>
 
                         <div className='col-md-6'>
                             <label htmlFor="">Email : </label>
-                            <input type="email" name="email" className="form-control" placeholder='Enter Email' value={email} onChange={(e) => setEmail(e.target.value)} />
-                            {errors.email && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.email}</div>}
+                            <input type="email" {...register("email")} className="form-control" placeholder='Enter Email' />
+                            {errors.email && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.email.message}</div>}
                         </div>
 
                         <div className='col-md-6'>
                             <label htmlFor="">Age : </label>
-                            <input type="number" name="age" className="form-control" placeholder='Enter Age' value={age} readOnly />
-                            {errors.age && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.age}</div>}
+                            <input type="number" {...register("age")} className="form-control" placeholder='Enter Age' readOnly />
+                            {errors.age && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.age.message}</div>}
                         </div>
 
                         <div className="col-12">
                             <label>Profile Picture: </label>
                             <div className="custom-file-input">
-                                <input type="file" className="form-control" accept="image/*" onChange={handleFileChange}/>
+                                <input type="file" className="form-control" accept="image/*" onChange={handleFileChange} />
                                 {profilePicture && !selectedFile && (
                                     <div>Current Profile Picture: {profilePicture.split('/').pop()}</div>
                                 )}
