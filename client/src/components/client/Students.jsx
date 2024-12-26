@@ -9,10 +9,11 @@ import '../../assets/client/Students.css';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-//
 import StudentDetailsModal from './StudentDetailsModal';
+import { observer } from 'mobx-react-lite';
+import authStore from '../../mobx/authStore';
 
-function Students() {
+const Students = observer(() => {
 
     const location = useLocation();
     const dispatch = useDispatch();
@@ -27,7 +28,7 @@ function Students() {
 
     const students = useSelector(state => state.students.students || []);
     const totalPages = useSelector(state => state.students.totalPages);
-    const user = useSelector(state => state.auth.user);
+    const user = authStore.user;
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
@@ -126,7 +127,7 @@ function Students() {
     };
 
     const handleShowStudentDetails = (student) => {
-        setSelectedStudent(student); // Set selected student to show in modal
+        setSelectedStudent(student);
     };
 
     const paginate = (pageNumber) => {
@@ -263,6 +264,6 @@ function Students() {
             <StudentDetailsModal student={selectedStudent} closeModal={() => setSelectedStudent(null)} />
         </div>
     )
-}
+});
 
 export default Students;

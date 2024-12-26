@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../../assets/client/LoginSignup.css';
-import { useDispatch } from 'react-redux';
-import { loginAsync, signupAsync } from '../../redux/authSlice';
+import { observer } from 'mobx-react-lite';
+import authStore from '../../mobx/authStore';
 import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
@@ -13,7 +13,6 @@ const LoginSignup = () => {
   const [signupData, setSignupData] = useState({ username: '', email: '', password: '' });
   const [error, setError] = useState('');
 
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [isNavigated, setIsNavigated] = useState(false);
@@ -37,11 +36,15 @@ const LoginSignup = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      await dispatch(loginAsync({ email: loginData.email, password: loginData.password })).unwrap();
-      toast.success('Login successful!');
-      setTimeout(() => {
-        navigate('/');
-      }, 1000);
+      await authStore.login(loginData.email, loginData.password);
+      if (authStore.status === 'succeeded') {
+        toast.success('Login successful!');
+        setTimeout(() => {
+          navigate('/');
+        }, 1000);
+      } else {
+        setError(authStore.error);
+      }
     } catch (err) {
       setError('Login failed. Please check your credentials.');
     }
@@ -50,11 +53,15 @@ const LoginSignup = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      await dispatch(signupAsync(signupData)).unwrap();
-      toast.success('Signup successful!');
-      setTimeout(() => {
-        navigate('/');
-      }, 1000);
+      await authStore.signup(signupData.username, signupData.email, signupData.password, signupData.role);
+      if (authStore.status === 'succeeded') {
+        toast.success('Signup successful!');
+        setTimeout(() => {
+          navigate('/');
+        }, 1000);
+      } else {
+        setError(authStore.error);
+      }
     } catch (err) {
       setError('Signup failed. Please try again.');
     }
