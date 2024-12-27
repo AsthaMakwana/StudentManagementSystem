@@ -222,11 +222,7 @@ const Students = observer(() => {
                                                         <FaEdit size={20} style={{ color: 'black' }} />
                                                     </button>
                                                 </Link>
-                                                <button
-                                                    className='btn btn-light me-2'
-                                                    title="More Info"
-                                                    onClick={() => handleShowStudentDetails(student)}
-                                                >
+                                                <button className='btn btn-light me-2' title="More Info" onClick={() => handleShowStudentDetails(student)}>
                                                     <FiInfo size={20} />
                                                 </button>
                                                 <button className='btn btn-light me-2' onClick={() => handleDelete(student._id)} title="Delete">
@@ -242,8 +238,10 @@ const Students = observer(() => {
 
                     <nav>
                         <ul className="pagination justify-content-center">
-                            <li className="page-item" onClick={() => paginate(currentPage > 1 ? currentPage - 1 : 1)}>
-                                <button className="page-link" aria-label="Previous">Previous</button>
+                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                <button className="page-link" aria-label="Previous" onClick={() => currentPage > 1 && paginate(currentPage - 1)} disabled={currentPage === 1}>
+                                    Previous
+                                </button>
                             </li>
                             {Array.from({ length: totalPages }, (_, index) => (
                                 <li key={index + 1} className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}>
@@ -252,8 +250,15 @@ const Students = observer(() => {
                                     </button>
                                 </li>
                             ))}
-                            <li className="page-item" onClick={() => paginate(currentPage < totalPages ? currentPage + 1 : totalPages)}>
-                                <button className="page-link" aria-label="Next">Next</button>
+                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                <button
+                                    className="page-link"
+                                    aria-label="Next"
+                                    onClick={() => currentPage < totalPages && paginate(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    Next
+                                </button>
                             </li>
                         </ul>
                     </nav>
