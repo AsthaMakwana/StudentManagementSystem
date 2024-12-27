@@ -62,7 +62,6 @@ exports.createStudent = (req, res) => {
 exports.getStudents = async (req, res) => {
     try {
         const { page = 1, limit = 5, searchQuery, ageFilter } = req.query;
-
         let query = {};
         if (searchQuery) {
             query = {
@@ -89,14 +88,13 @@ exports.getStudents = async (req, res) => {
 
         const totalStudents = await StudentModel.countDocuments(query);
         const totalPages = Math.ceil(totalStudents / limit);
-
         res.json({ students, totalPages });
-    } catch (error) {
+    }
+    catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error fetching students" });
     }
 };
-
 
 exports.getStudentById = (req, res) => {
     const id = req.params.id;
@@ -137,12 +135,12 @@ exports.deleteStudent = (req, res) => {
 };
 
 exports.checkEmail = async (req, res) => {
-    const { email, studentId } = req.body; 
-    
+    const { email, studentId } = req.body;
+
     try {
         let student;
         if (studentId) {
-            student = await StudentModel.findOne({ email, _id: { $ne: studentId } }); 
+            student = await StudentModel.findOne({ email, _id: { $ne: studentId } });
         } else {
             student = await StudentModel.findOne({ email });
         }

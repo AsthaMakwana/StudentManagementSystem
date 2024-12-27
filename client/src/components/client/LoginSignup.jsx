@@ -74,14 +74,10 @@ const LoginSignup = () => {
         <header>Login</header>
 
         <form onSubmit={handleLogin}>
-
           <input type="email" name="email" placeholder="Enter your email" value={loginData.email} onChange={handleLoginChange} required />
           <input type="password" name="password" placeholder="Enter your password" value={loginData.password} onChange={handleLoginChange} required />
-
           {error && <div className="error">{error}</div>}
-
           <input type="submit" className="button" value="Login" />
-
         </form>
 
         <div className="signup">
@@ -96,20 +92,15 @@ const LoginSignup = () => {
         <header>Signup</header>
 
         <form onSubmit={handleSignup}>
-
-          <input type="text" name="username" placeholder="Enter your username" value={signupData.username} onChange={handleSignupChange} required/>
-          <input type="email" name="email" placeholder="Enter your email" value={signupData.email} onChange={handleSignupChange} required/>
-          <input type="password" name="password" placeholder="Create a password" value={signupData.password} onChange={handleSignupChange} required/>
-
+          <input type="text" name="username" placeholder="Enter your username" value={signupData.username} onChange={handleSignupChange} required />
+          <input type="email" name="email" placeholder="Enter your email" value={signupData.email} onChange={handleSignupChange} required />
+          <input type="password" name="password" placeholder="Create a password" value={signupData.password} onChange={handleSignupChange} required />
           <select name="role" value={signupData.role} onChange={handleSignupChange} required>
             <option value="user">User</option>
             <option value="admin">Admin</option>
           </select>
-
           {error && <div className="error">{error}</div>}
-
           <input type="submit" className="button" value="Signup" />
-
         </form>
 
         <div className="signup">

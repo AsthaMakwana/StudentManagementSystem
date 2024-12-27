@@ -76,20 +76,21 @@ function UpdateStudent() {
     };
 
     const onSubmit = (data) => {
+        const isUnchanged = Object.keys(watchedData).every((key) => {
+            if (key === "birthdate") {
+                return new Date(watchedData[key]).toLocaleDateString() === new Date(initialData[key]).toLocaleDateString();
+            }
+            if (key === "profilePicture") {
+                return !selectedFile && watchedData[key] === initialData[key];
+            }
+            return watchedData[key] === initialData[key];
+        });
 
-        // const isUnchanged = Object.keys(watchedData).every((key) => {
-        //     if (key === "birthdate") {
-        //         return new Date(watchedData[key]).toLocaleDateString() === new Date(initialData[key]).toLocaleDateString();
-        //     }
-        //     if (key === "profilePicture") {
-        //         return selectedFile === null && watchedData[key] === initialData[key];
-        //     }
-        //     return watchedData[key] === initialData[key];
-        // });
-        // if (isUnchanged) {
-        //     toast.info('No changes detected.');
-        //     return;
-        // }
+        if (!selectedFile && isUnchanged) {
+            toast.info('No changes detected.');
+            return;
+        }
+
         const { error } = studentSchema.validate(
             data,
             { abortEarly: false }
@@ -116,10 +117,12 @@ function UpdateStudent() {
 
         studentStore.updateStudent(id, formData, token)
             .then(() => {
-                toast.success('Student updated successfully!');
-                setTimeout(() => {
-                    navigate("/", { state: { page: location.state?.fromPage || 1 } });
-                }, 2000);
+                navigate("/", {
+                    state: {
+                        toastMessage: 'Student updated successfully!',
+                        page: location.state?.fromPage || 1
+                    }
+                });
             })
             .catch((error) => {
                 console.error(error);
@@ -145,7 +148,6 @@ function UpdateStudent() {
                     </button>
 
                     <form onSubmit={handleSubmit(onSubmit)} className="row g-4">
-                        <ToastContainer />
 
                         <h2 className="text-center text-primary fw-bold mb-3">Update Student</h2>
 
@@ -212,6 +214,7 @@ function UpdateStudent() {
                     </form>
                 </div>
             </div>
+            <ToastContainer />
         </div>
     )
 }

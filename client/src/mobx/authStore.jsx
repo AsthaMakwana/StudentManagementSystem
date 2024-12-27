@@ -5,6 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 const AUTH_API_BASE_URL = process.env.REACT_APP_AUTH_API_BASE_URL;
 
 class AuthStore {
+
     token = localStorage.getItem('authToken') || null;
     user = null;
     status = 'idle';

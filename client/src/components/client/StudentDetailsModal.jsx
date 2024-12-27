@@ -1,4 +1,3 @@
-// StudentDetailsModal.jsx
 import React from 'react';
 import { FaTimes } from 'react-icons/fa';
 
@@ -18,12 +17,7 @@ function StudentDetailsModal({ student, closeModal }) {
                     <div className="card-body">
                         <div className="profile-picture mb-4 text-center">
                             {student.profilePicture ? (
-                                <img
-                                    src={`http://localhost:3001${student.profilePicture}`}
-                                    alt="Profile"
-                                    className="img-thumbnail rounded-circle"
-                                    style={{ width: '100px', height: '100px' }}
-                                />
+                                <img src={`http://localhost:3001${student.profilePicture}`} alt="Profile" className="img-thumbnail rounded-circle" style={{ width: '100px', height: '100px' }} />
                             ) : (
                                 <div className="no-image">No Image</div>
                             )}

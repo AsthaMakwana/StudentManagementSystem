@@ -28,7 +28,6 @@ const Students = observer(() => {
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
-        
         setStudents(
             currentPage,
             studentsPerPage,
@@ -37,6 +36,13 @@ const Students = observer(() => {
             ageFilter,
         );
     }, [currentPage, searchQuery, ageFilter, setStudents]);
+
+    useEffect(() => {
+        if (location.state?.toastMessage) {
+            toast.success(location.state.toastMessage);
+            navigate(location.pathname, { replace: true });
+        }
+    }, [location, navigate]);
 
     useEffect(() => {
         if (currentPage > totalPages && totalPages > 0) {
@@ -79,7 +85,7 @@ const Students = observer(() => {
             );
             if (isConfirmed) {
                 selectedStudentIds.forEach((id) => {
-                    deleteStudent( id, token );
+                    deleteStudent(id, token);
                 });
                 setTimeout(() => {
                     setSelectedStudentIds([]);
@@ -134,9 +140,7 @@ const Students = observer(() => {
             <div className="d-flex vh-100 justify-content-center align-items-center" style={{ position: 'relative' }}>
                 <div className="logout-button"></div>
                 <div className="w-75 bg-white rounded p-3">
-
                     <ToastContainer />
-
                     <h1 style={{ textAlign: 'center' }}>Student Management System</h1>
 
                     {user ? (
@@ -175,9 +179,11 @@ const Students = observer(() => {
                         <table className="table text-center">
                             <thead>
                                 <tr>
-                                    <th>
-                                        <input type="checkbox" onChange={handleSelectAll} checked={isAllSelected()}/>
-                                    </th>
+                                    {user && user.role === 'admin' && (
+                                        <th>
+                                            <input type="checkbox" onChange={handleSelectAll} checked={isAllSelected()} />
+                                        </th>
+                                    )}
                                     <th>Profile Picture</th>
                                     <th>Name</th>
                                     <th>Roll no</th>
@@ -195,9 +201,11 @@ const Students = observer(() => {
                             <tbody>
                                 {(students || []).map(student => (
                                     <tr key={student._id}>
-                                        <td>
-                                            <input type="checkbox" checked={selectedStudentIds.includes(student._id)} onChange={() => handleSelectStudent(student._id)} />
-                                        </td>
+                                        {user && user.role === 'admin' && (
+                                            <td>
+                                                <input type="checkbox" checked={selectedStudentIds.includes(student._id)} onChange={() => handleSelectStudent(student._id)} />
+                                            </td>
+                                        )}
                                         <td>
                                             {student.profilePicture ? (
                                                 <img src={`http://localhost:3001${student.profilePicture}`} alt="Profile" style={{ width: '50px', height: '50px', borderRadius: '50%' }} />

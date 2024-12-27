@@ -4,6 +4,7 @@ import axios from "axios";
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 class StudentStore {
+
   students = [];
   student = null;
   totalPages = 0;
@@ -18,10 +19,7 @@ class StudentStore {
   createStudent = async (formData, token) => {
     try {
       const email = formData.get("email");
-
-      const emailCheckResponse = await axios.post(
-        `${API_BASE_URL}/checkEmail`,
-        { email },
+      const emailCheckResponse = await axios.post(`${API_BASE_URL}/checkEmail`, { email },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -34,9 +32,9 @@ class StudentStore {
       const response = await axios.post(`${API_BASE_URL}/createStudent`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       this.students.push(response.data);
-    } catch (error) {
+    }
+    catch (error) {
       this.error = error.message;
     }
   };
@@ -44,9 +42,7 @@ class StudentStore {
   updateStudent = async (id, formData, token) => {
     try {
       const email = formData.get("email");
-      const emailCheckResponse = await axios.post(
-        `${API_BASE_URL}/checkEmail`,
-        { email, studentId: id },
+      const emailCheckResponse = await axios.post(`${API_BASE_URL}/checkEmail`, { email, studentId: id },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -66,10 +62,10 @@ class StudentStore {
 
       const index = this.students.findIndex((student) => student._id === id);
       if (index !== -1) {
-        
         this.students[index] = response.data;
       }
-    } catch (error) {
+    } 
+    catch (error) {
       this.error = error.message;
     }
   };
@@ -89,7 +85,8 @@ class StudentStore {
       this.students = response.data.students;
       this.totalPages = response.data.totalPages;
       this.loading = false;
-    } catch (error) {
+    } 
+    catch (error) {
       this.loading = false;
       this.error = error.message;
     }
@@ -100,9 +97,9 @@ class StudentStore {
       await axios.delete(`${API_BASE_URL}/deleteStudent/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       this.students = this.students.filter((student) => student._id !== id);
-    } catch (error) {
+    } 
+    catch (error) {
       this.error = error.message;
     }
   };
@@ -112,9 +109,9 @@ class StudentStore {
       const response = await axios.get(`${API_BASE_URL}/getStudent/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       this.student = response.data;
-    } catch (error) {
+    } 
+    catch (error) {
       this.error = error.message;
     }
   };
