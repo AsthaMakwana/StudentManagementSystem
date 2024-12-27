@@ -1,19 +1,15 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { logout } from '../../redux/authSlice';
 import { observer } from 'mobx-react-lite'; 
 import authStore from '../../mobx/authStore';
 
-const Navbar = () => {
+const Navbar = observer(() => {
 
     const user = authStore.user;
-    console.log('oooo', user);
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        dispatch(logout());
+        authStore.logout();
         navigate('/login');
     };
 
@@ -43,6 +39,6 @@ const Navbar = () => {
             </div>
         </nav>
     );
-};
+});
 
 export default Navbar;

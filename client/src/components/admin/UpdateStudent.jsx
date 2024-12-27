@@ -3,8 +3,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Joi from 'joi';
 import Navbar from '../client/Navbar';
-import { useDispatch, useSelector } from 'react-redux';
-import { updateStudentAsync, getStudentByIdAsync } from '../../redux/studentSlice';
+import studentStore from '../../mobx/studentStore';
+import { observer } from 'mobx-react';
 import '../../assets/admin/CreateStudent.css';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -14,9 +14,8 @@ function UpdateStudent() {
 
     const { id } = useParams();
     const location = useLocation();
-    const student = useSelector(state => state.students.student);
+    const student = studentStore.student;
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     const [profilePicture, setProfilePicture] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -38,8 +37,8 @@ function UpdateStudent() {
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
-        dispatch(getStudentByIdAsync({ id, token }));
-    }, [dispatch, id]);
+        studentStore.getStudentById(id, token);
+    }, [id]);
 
     useEffect(() => {
         if (student) {
@@ -77,20 +76,20 @@ function UpdateStudent() {
     };
 
     const onSubmit = (data) => {
-        
-        const isUnchanged = Object.keys(watchedData).every((key) => {
-            if (key === "birthdate") {
-                return new Date(watchedData[key]).toLocaleDateString() === new Date(initialData[key]).toLocaleDateString();
-            }
-            if (key === "profilePicture") {
-                return selectedFile === null && watchedData[key] === initialData[key];
-            }
-            return watchedData[key] === initialData[key];
-        });
-        if (isUnchanged) {
-            toast.info('No changes detected.');
-            return;
-        }
+
+        // const isUnchanged = Object.keys(watchedData).every((key) => {
+        //     if (key === "birthdate") {
+        //         return new Date(watchedData[key]).toLocaleDateString() === new Date(initialData[key]).toLocaleDateString();
+        //     }
+        //     if (key === "profilePicture") {
+        //         return selectedFile === null && watchedData[key] === initialData[key];
+        //     }
+        //     return watchedData[key] === initialData[key];
+        // });
+        // if (isUnchanged) {
+        //     toast.info('No changes detected.');
+        //     return;
+        // }
         const { error } = studentSchema.validate(
             data,
             { abortEarly: false }
@@ -115,14 +114,12 @@ function UpdateStudent() {
         });
         if (selectedFile) formData.append("profilePicture", selectedFile);
 
-        dispatch(updateStudentAsync({ id, formData, token }))
-            .unwrap()
+        studentStore.updateStudent(id, formData, token)
             .then(() => {
                 toast.success('Student updated successfully!');
                 setTimeout(() => {
                     navigate("/", { state: { page: location.state?.fromPage || 1 } });
                 }, 2000);
-
             })
             .catch((error) => {
                 console.error(error);
@@ -219,4 +216,4 @@ function UpdateStudent() {
     )
 }
 
-export default UpdateStudent;
+export default observer(UpdateStudent);

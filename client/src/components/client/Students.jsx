@@ -3,20 +3,17 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { FiInfo } from 'react-icons/fi';
 import Navbar from './Navbar';
-import { useDispatch, useSelector } from 'react-redux';
-import { setStudentAsync, deleteStudentAsync } from '../../redux/studentSlice';
+import { observer } from 'mobx-react-lite';
+import studentStore from '../../mobx/studentStore';
 import '../../assets/client/Students.css';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 import StudentDetailsModal from './StudentDetailsModal';
-import { observer } from 'mobx-react-lite';
 import authStore from '../../mobx/authStore';
 
 const Students = observer(() => {
 
     const location = useLocation();
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -26,20 +23,20 @@ const Students = observer(() => {
     const [selectedStudentIds, setSelectedStudentIds] = useState([]);
     const [selectedStudent, setSelectedStudent] = useState(null);
 
-    const students = useSelector(state => state.students.students || []);
-    const totalPages = useSelector(state => state.students.totalPages);
+    const { students, totalPages, loading, setStudents, deleteStudent } = studentStore;
     const user = authStore.user;
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
-        dispatch(setStudentAsync({
+        
+        setStudents(
             currentPage,
             studentsPerPage,
             token,
             searchQuery,
             ageFilter,
-        }));
-    }, [dispatch, currentPage, studentsPerPage, searchQuery, ageFilter]);
+        );
+    }, [currentPage, searchQuery, ageFilter, setStudents]);
 
     useEffect(() => {
         if (currentPage > totalPages && totalPages > 0) {
@@ -61,16 +58,16 @@ const Students = observer(() => {
 
     const handleSelectAll = (e) => {
         if (e.target.checked) {
-            const visibleIds = students.students.map((student) => student._id);
+            const visibleIds = students.map((student) => student._id);
             setSelectedStudentIds((prev) => [...new Set([...prev, ...visibleIds])]);
         } else {
-            const visibleIds = students.students.map((student) => student._id);
+            const visibleIds = students.map((student) => student._id);
             setSelectedStudentIds((prev) => prev.filter((id) => !visibleIds.includes(id)));
         }
     };
 
     const isAllSelected = () => {
-        const visibleIds = students.students.map((student) => student._id);
+        const visibleIds = students.map((student) => student._id);
         return visibleIds.every((id) => selectedStudentIds.includes(id));
     };
 
@@ -82,18 +79,16 @@ const Students = observer(() => {
             );
             if (isConfirmed) {
                 selectedStudentIds.forEach((id) => {
-                    dispatch(deleteStudentAsync({ id, token }));
+                    deleteStudent( id, token );
                 });
                 setTimeout(() => {
                     setSelectedStudentIds([]);
-                    dispatch(
-                        setStudentAsync({
-                            currentPage,
-                            studentsPerPage,
-                            searchQuery,
-                            ageFilter,
-                            token,
-                        })
+                    setStudents(
+                        currentPage,
+                        studentsPerPage,
+                        searchQuery,
+                        ageFilter,
+                        token,
                     );
                     navigate("/", { state: { page: location.state?.fromPage || 1 } });
                 }, 500);
@@ -107,22 +102,17 @@ const Students = observer(() => {
         const isConfirmed = window.confirm("Are you sure you want to remove this student?");
         if (isConfirmed) {
             const token = localStorage.getItem('authToken');
-            dispatch(deleteStudentAsync({ id, token }))
-                .then(() => {
-                    dispatch(setStudentAsync({
-                        currentPage,
-                        studentsPerPage,
-                        searchQuery,
-                        token
-                    }));
-                    toast.success('Student deleted successfully!');
-                    setTimeout(() => {
-                        navigate("/", { state: { page: location.state?.fromPage || 1 } });
-                    }, 1000);
-
-                });
-        } else {
-            console.log("Deletion canceled.");
+            deleteStudent(id, token);
+            setStudents(
+                currentPage,
+                studentsPerPage,
+                searchQuery,
+                token,
+            );
+            toast.success('Student deleted successfully!');
+            setTimeout(() => {
+                navigate("/", { state: { page: location.state?.fromPage || 1 } });
+            }, 1000);
         }
     };
 
@@ -203,7 +193,7 @@ const Students = observer(() => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {(students.students || []).map(student => (
+                                {(students || []).map(student => (
                                     <tr key={student._id}>
                                         <td>
                                             <input type="checkbox" checked={selectedStudentIds.includes(student._id)} onChange={() => handleSelectStudent(student._id)} />

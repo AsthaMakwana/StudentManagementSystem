@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { createStudentAsync } from '../../redux/studentSlice';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import Joi from 'joi';
 import Navbar from '../client/Navbar';
+import studentStore from '../../mobx/studentStore'; 
+import { observer } from 'mobx-react';
 import '../../assets/admin/CreateStudent.css';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function CreateStudent() {
 
-    const dispatch = useDispatch();
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -52,7 +51,7 @@ function CreateStudent() {
         setProfilePicture(e.target.files[0]);
     };
 
-    const onSubmit = (data) => {
+    const onSubmit = async (data) => {
         const { error } = studentSchema.validate(data, { abortEarly: false });
 
         if (error) {
@@ -74,24 +73,15 @@ function CreateStudent() {
         });
         if (profilePicture) formData.append("profilePicture", profilePicture);
 
-        dispatch(createStudentAsync({ formData, token }))
-            .unwrap()
-            .then(() => {
-                toast.success('Student added successfully!');
-                setTimeout(() => {
-                    navigate("/", { state: { page: location.state?.fromPage || 1 } });
-                }, 2000);
-            })
-            .catch((error) => {
-                console.log(error.exists)
-                if (error.exists) {
-                    console.log("true", error.email);
-
-                    setError("email", { message: 'This email is already taken' });
-                } else {
-                    console.error(error);
-                }
-            });
+        try {
+            await studentStore.createStudent(formData, token);
+            toast.success('Student added successfully!');
+            setTimeout(() => {
+                navigate("/", { state: { page: location.state?.fromPage || 1 } });
+            }, 2000);
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     return (
@@ -169,4 +159,4 @@ function CreateStudent() {
     );
 }
 
-export default CreateStudent;
+export default observer(CreateStudent);
