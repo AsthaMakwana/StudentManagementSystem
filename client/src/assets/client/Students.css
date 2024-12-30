@@ -8,7 +8,7 @@
     background-image: url("https://www.oxfordlearning.com/wp-content/uploads/2018/09/how-to-help-your-child-focus-in-school-860x420.jpeg");
     background-size: cover;
     background-repeat: no-repeat;
-    opacity: 0.5;
+    opacity: 0.6;
     z-index: -1;
 }
 .logout-button {
@@ -22,4 +22,7 @@ button:hover {
 }
 button:focus {
     outline: none;
+}
+body, html {
+    overflow: hidden;
 }
