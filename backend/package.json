@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "ts-node-dev --respawn backend/server.ts"
+    "dev": "ts-node-dev --respawn --files server.ts"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +21,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.3",
     "multer": "^1.4.5-lts.1",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "ts-node-dev": "^2.0.0"
   }
 }

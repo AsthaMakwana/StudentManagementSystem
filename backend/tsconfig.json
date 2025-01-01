@@ -8,7 +8,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "typeRoots": ["./node_modules/@types", "./backend/types"],
+    "typeRoots": ["./node_modules/@types", "./types"]
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "dist"]

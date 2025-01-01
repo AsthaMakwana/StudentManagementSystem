@@ -28,7 +28,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 
-export const createStudent = (req: Request, res: Response): void => {
+export const createStudent = async(req: Request, res: Response): Promise<void> => {
 
     const { error } = studentSchema.validate({
         name: req.body.name,
@@ -45,19 +45,49 @@ export const createStudent = (req: Request, res: Response): void => {
         return;
     }
 
-    const newStudent = new StudentModel({
-        name: req.body.name,
-        surname: req.body.surname,
-        birthdate: req.body.birthdate,
-        rollno: req.body.rollno,
-        address: req.body.address,
-        email: req.body.email,
-        age: req.body.age,
-        profilePicture: req.file ? `/uploads/${req.file.filename}` : null,
-    });
-    newStudent.save()
-        .then(student => res.json(student))
-        .catch(err => res.status(500).json({ message: 'Error creating student', error: err }));
+    // const newStudent = new StudentModel({
+    //     name: req.body.name,
+    //     surname: req.body.surname,
+    //     birthdate: req.body.birthdate,
+    //     rollno: req.body.rollno,
+    //     address: req.body.address,
+    //     email: req.body.email,
+    //     age: req.body.age,
+    //     profilePicture: req.file ? `/uploads/${req.file.filename}` : null,
+    // });
+    // newStudent.save()
+    //     .then(student => res.json(student))
+    //     .catch(err => res.status(500).json({ message: 'Error creating student', error: err }));
+    try {
+        // Check if the email already exists
+        const existingStudent = await StudentModel.findOne({ email: req.body.email });
+        if (existingStudent) {
+            res.status(400).json({ message: "Email is already taken" });
+            return;
+        }
+
+        // Create new student
+        const newStudent = new StudentModel({
+            name: req.body.name,
+            surname: req.body.surname,
+            birthdate: req.body.birthdate,
+            rollno: req.body.rollno,
+            address: req.body.address,
+            email: req.body.email,
+            age: req.body.age,
+            profilePicture: req.file ? `/uploads/${req.file.filename}` : null,
+        });
+
+        // Save student to the database
+        await newStudent.save();
+        res.status(201).json(newStudent); // Return the newly created student
+
+    } catch (err) {
+        console.error(err);
+        if (!res.headersSent) { // Ensure headers are not already sent before sending an error response
+            res.status(500).json({ message: 'Error creating student', error: err });
+        }
+    }
 };
 
 
@@ -95,6 +125,7 @@ export const getStudents = async (req: Request, res: Response): Promise<void> =>
 
         const totalStudents = await StudentModel.countDocuments(query);
         const totalPages = Math.ceil(totalStudents / limitNumber);
+        
 
         res.json({ students, totalPages });
     }
@@ -162,7 +193,6 @@ export const checkEmail = async (req: Request, res: Response): Promise<void> => 
         
         if (student) {
             res.status(400).json({ exists: true });
-            console.log("huu", student);
         }
         res.status(200).json({ exists: false });
         return

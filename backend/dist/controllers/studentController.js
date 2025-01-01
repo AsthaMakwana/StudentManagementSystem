@@ -36,7 +36,7 @@ const storage = multer_1.default.diskStorage({
     }
 });
 const upload = (0, multer_1.default)({ storage: storage });
-const createStudent = (req, res) => {
+const createStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { error } = studentSchema.validate({
         name: req.body.name,
         surname: req.body.surname,
@@ -51,20 +51,48 @@ const createStudent = (req, res) => {
         res.status(400).json({ message: error.details[0].message });
         return;
     }
-    const newStudent = new Students_1.default({
-        name: req.body.name,
-        surname: req.body.surname,
-        birthdate: req.body.birthdate,
-        rollno: req.body.rollno,
-        address: req.body.address,
-        email: req.body.email,
-        age: req.body.age,
-        profilePicture: req.file ? `/uploads/${req.file.filename}` : null,
-    });
-    newStudent.save()
-        .then(student => res.json(student))
-        .catch(err => res.status(500).json({ message: 'Error creating student', error: err }));
-};
+    // const newStudent = new StudentModel({
+    //     name: req.body.name,
+    //     surname: req.body.surname,
+    //     birthdate: req.body.birthdate,
+    //     rollno: req.body.rollno,
+    //     address: req.body.address,
+    //     email: req.body.email,
+    //     age: req.body.age,
+    //     profilePicture: req.file ? `/uploads/${req.file.filename}` : null,
+    // });
+    // newStudent.save()
+    //     .then(student => res.json(student))
+    //     .catch(err => res.status(500).json({ message: 'Error creating student', error: err }));
+    try {
+        // Check if the email already exists
+        const existingStudent = yield Students_1.default.findOne({ email: req.body.email });
+        if (existingStudent) {
+            res.status(400).json({ message: "Email is already taken" });
+            return;
+        }
+        // Create new student
+        const newStudent = new Students_1.default({
+            name: req.body.name,
+            surname: req.body.surname,
+            birthdate: req.body.birthdate,
+            rollno: req.body.rollno,
+            address: req.body.address,
+            email: req.body.email,
+            age: req.body.age,
+            profilePicture: req.file ? `/uploads/${req.file.filename}` : null,
+        });
+        // Save student to the database
+        yield newStudent.save();
+        res.status(201).json(newStudent); // Return the newly created student
+    }
+    catch (err) {
+        console.error(err);
+        if (!res.headersSent) { // Ensure headers are not already sent before sending an error response
+            res.status(500).json({ message: 'Error creating student', error: err });
+        }
+    }
+});
 exports.createStudent = createStudent;
 const getStudents = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -152,7 +180,6 @@ const checkEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         }
         if (student) {
             res.status(400).json({ exists: true });
-            return;
         }
         res.status(200).json({ exists: false });
         return;
