@@ -18,40 +18,20 @@ class StudentStore {
 
   createStudent = async (formData, token) => {
     try {
-      const email = formData.get("email");
-      const emailCheckResponse = await axios.post(`${API_BASE_URL}/checkEmail`, { email },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (emailCheckResponse.data.exists) {
-        throw new Error("Email already in use");
-      }
-
       const response = await axios.post(`${API_BASE_URL}/createStudent`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       this.students.push(response.data);
+      return response.data;
     }
     catch (error) {
-      this.error = error.message;
+      this.error = error.response?.data?.message || error.message;
+      throw new Error(this.error);
     }
   };
 
   updateStudent = async (id, formData, token) => {
     try {
-      const email = formData.get("email");
-      const emailCheckResponse = await axios.post(`${API_BASE_URL}/checkEmail`, { email, studentId: id },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (emailCheckResponse.data.exists) {
-        throw new Error("Email already in use");
-      }
-
       const response = await axios.put(
         `${API_BASE_URL}/updateStudent/${id}`,
         formData,
@@ -59,14 +39,17 @@ class StudentStore {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
       const index = this.students.findIndex((student) => student._id === id);
       if (index !== -1) {
         this.students[index] = response.data;
       }
-    } 
+      return response;
+    }
     catch (error) {
-      this.error = error.message;
+      if (error.response && error.response.data) {
+        throw error.response.data;
+      }
+      throw error;
     }
   };
 
@@ -85,7 +68,7 @@ class StudentStore {
       this.students = response.data.students;
       this.totalPages = response.data.totalPages;
       this.loading = false;
-    } 
+    }
     catch (error) {
       this.loading = false;
       this.error = error.message;
@@ -98,7 +81,7 @@ class StudentStore {
         headers: { Authorization: `Bearer ${token}` },
       });
       this.students = this.students.filter((student) => student._id !== id);
-    } 
+    }
     catch (error) {
       this.error = error.message;
     }
@@ -110,7 +93,7 @@ class StudentStore {
         headers: { Authorization: `Bearer ${token}` },
       });
       this.student = response.data;
-    } 
+    }
     catch (error) {
       this.error = error.message;
     }

@@ -3,6 +3,7 @@ import Joi from 'joi';
 import multer from 'multer';
 import path from 'path';
 import StudentModel from '../models/Students';
+import { Types } from "mongoose";
 
 
 const studentSchema = Joi.object({
@@ -28,45 +29,21 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 
-export const createStudent = async(req: Request, res: Response): Promise<void> => {
+export const createStudent = async (req: Request, res: Response): Promise<void> => {
 
-    const { error } = studentSchema.validate({
-        name: req.body.name,
-        surname: req.body.surname,
-        birthdate: req.body.birthdate,
-        rollno: req.body.rollno,
-        address: req.body.address,
-        email: req.body.email,
-        age: req.body.age,
-        profilePicture: req.body.profilePicture
-    });
-    if (error) {
-        res.status(400).json({ message: error.details[0].message });
-        return;
-    }
-
-    // const newStudent = new StudentModel({
-    //     name: req.body.name,
-    //     surname: req.body.surname,
-    //     birthdate: req.body.birthdate,
-    //     rollno: req.body.rollno,
-    //     address: req.body.address,
-    //     email: req.body.email,
-    //     age: req.body.age,
-    //     profilePicture: req.file ? `/uploads/${req.file.filename}` : null,
-    // });
-    // newStudent.save()
-    //     .then(student => res.json(student))
-    //     .catch(err => res.status(500).json({ message: 'Error creating student', error: err }));
     try {
-        // Check if the email already exists
-        const existingStudent = await StudentModel.findOne({ email: req.body.email });
-        if (existingStudent) {
-            res.status(400).json({ message: "Email is already taken" });
+        const { error } = studentSchema.validate({ ...req.body });
+        if (error) {
+            res.status(400).json({ message: error.details[0].message });
             return;
         }
 
-        // Create new student
+        const existingStudent = await StudentModel.findOne({ email: req.body.email });
+        if (existingStudent) {
+            res.status(400).json({ message: "Email already in use" });
+            return;
+        }
+
         const newStudent = new StudentModel({
             name: req.body.name,
             surname: req.body.surname,
@@ -77,16 +54,12 @@ export const createStudent = async(req: Request, res: Response): Promise<void> =
             age: req.body.age,
             profilePicture: req.file ? `/uploads/${req.file.filename}` : null,
         });
-
-        // Save student to the database
         await newStudent.save();
-        res.status(201).json(newStudent); // Return the newly created student
-
-    } catch (err) {
+        res.status(201).json(newStudent);
+    }
+    catch (err) {
         console.error(err);
-        if (!res.headersSent) { // Ensure headers are not already sent before sending an error response
-            res.status(500).json({ message: 'Error creating student', error: err });
-        }
+        res.status(500).json({ message: "Error creating student", error: err });
     }
 };
 
@@ -125,8 +98,6 @@ export const getStudents = async (req: Request, res: Response): Promise<void> =>
 
         const totalStudents = await StudentModel.countDocuments(query);
         const totalPages = Math.ceil(totalStudents / limitNumber);
-        
-
         res.json({ students, totalPages });
     }
     catch (error) {
@@ -145,33 +116,39 @@ export const getStudentById = (req: Request, res: Response): void => {
 };
 
 
-export const updateStudent = (req: Request, res: Response): void => {
+export const updateStudent = async (req: Request, res: Response): Promise<void> => {
 
-    const { error } = studentSchema.validate(req.body);
-    if (error) {
-        res.status(400).json({ message: error.details[0].message });
-        return;
+    try {
+        const { error } = studentSchema.validate({ ...req.body });
+        if (error) {
+            res.status(400).json({ message: error.details[0].message });
+            return;
+        }
+
+        const existingStudent = await StudentModel.findOne({ email: req.body.email });
+        if (existingStudent && (existingStudent._id as Types.ObjectId).toString() !== req.params.id) {
+            res.status(400).json({ message: "Email already in use" });
+            return;
+        }
+
+        const updatedStudent = await StudentModel.findByIdAndUpdate(req.params.id, { ...req.body }, { new: true });
+        if (!updatedStudent) {
+            res.status(404).json({ message: "Student not found" });
+            return;
+        }
+        res.status(200).json(updatedStudent);
     }
-
-    const id = req.params.id;
-    const profilePicture = req.file ? `/uploads/${req.file.filename}` : req.body.profilePicture;
-
-    StudentModel.findByIdAndUpdate({ _id: id }, {
-        name: req.body.name,
-        surname: req.body.surname,
-        birthdate: req.body.birthdate,
-        rollno: req.body.rollno,
-        address: req.body.address,
-        email: req.body.email,
-        age: req.body.age,
-        profilePicture: profilePicture
-    })
-        .then(student => res.json(student))
-        .catch(err => res.status(500).json({ message: 'Error updating student', error: err }));
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Error updating student", error: err });
+    }
 };
 
+
 export const deleteStudent = (req: Request, res: Response): void => {
+
     const id = req.params.id;
+
     StudentModel.findByIdAndDelete({ _id: id })
         .then(result => res.json({ success: true, result }))
         .catch(err => res.status(500).json({ message: 'Error deleting student', error: err }));
@@ -186,17 +163,16 @@ export const checkEmail = async (req: Request, res: Response): Promise<void> => 
         let student;
         if (studentId) {
             student = await StudentModel.findOne({ email, _id: { $ne: studentId } });
-        } 
+        }
         else {
             student = await StudentModel.findOne({ email });
         }
-        
         if (student) {
             res.status(400).json({ exists: true });
         }
         res.status(200).json({ exists: false });
         return
-    } 
+    }
     catch (error: unknown) {
         if (error instanceof Error) {
             res.status(500).json({ message: error.message });

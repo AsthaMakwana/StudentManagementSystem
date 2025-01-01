@@ -74,16 +74,22 @@ function CreateStudent() {
         if (profilePicture) formData.append("profilePicture", profilePicture);
 
         try {
-            await studentStore.createStudent(formData, token);
-            navigate("/", {
-                state: {
-                    toastMessage: 'Student added successfully!',
-                    page: location.state?.fromPage || 1
-                }
-            });
-        } 
+            const createdStudent = await studentStore.createStudent(formData, token);
+            if (createdStudent) {
+                navigate("/", {
+                    state: {
+                        toastMessage: "Student added successfully!",
+                        page: location.state?.fromPage || 1,
+                    },
+                });
+            }
+        }
         catch (error) {
-            console.error(error);
+            if (error.message) {
+                setError("email", { message: error.message || 'Email is already taken' });
+            } else {
+                console.log("Unexpected error")
+            }
         }
     };
 

@@ -91,11 +91,7 @@ function UpdateStudent() {
             return;
         }
 
-        const { error } = studentSchema.validate(
-            data,
-            { abortEarly: false }
-        );
-
+        const { error } = studentSchema.validate(data, { abortEarly: false });
         if (error) {
             const newErrors = error.details.reduce((acc, curr) => {
                 acc[curr.path[0]] = curr.message;
@@ -125,14 +121,12 @@ function UpdateStudent() {
                 });
             })
             .catch((error) => {
-                console.error(error);
-                if (error.exists) {
-                    setError("email", { message: 'Email is already taken' });
+                if (error.message) {
+                    setError("email", { message: error.message || 'Email is already taken' });
                 } else {
-                    console.error('Unexpected error:', error);
+                    toast.error('Unexpected error occurred.');
                 }
             });
-
     };
 
     return (
