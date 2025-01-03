@@ -5,7 +5,6 @@ import path from 'path';
 import StudentModel from '../models/Students';
 import { Types } from "mongoose";
 
-
 const studentSchema = Joi.object({
     name: Joi.string().min(3).max(30).required(),
     surname: Joi.string().min(3).max(30).required(),
@@ -17,7 +16,6 @@ const studentSchema = Joi.object({
     profilePicture: Joi.string().uri().optional(),
 });
 
-
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads/');
@@ -26,11 +24,10 @@ const storage = multer.diskStorage({
         cb(null, Date.now() + path.extname(file.originalname));
     }
 });
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage }).single('profilePicture');
 
 
 export const createStudent = async (req: Request, res: Response): Promise<void> => {
-
     try {
         const { error } = studentSchema.validate({ ...req.body });
         if (error) {
@@ -65,7 +62,6 @@ export const createStudent = async (req: Request, res: Response): Promise<void> 
 
 
 export const getStudents = async (req: Request, res: Response): Promise<void> => {
-
     try {
         const { page = 1, limit = 5, searchQuery, ageFilter } = req.query;
         const pageNumber = parseInt(page as string, 10);
@@ -108,7 +104,6 @@ export const getStudents = async (req: Request, res: Response): Promise<void> =>
 
 
 export const getStudentById = (req: Request, res: Response): void => {
-
     const id = req.params.id;
     StudentModel.findById({ _id: id })
         .then(student => res.json(student))
@@ -117,7 +112,6 @@ export const getStudentById = (req: Request, res: Response): void => {
 
 
 export const updateStudent = async (req: Request, res: Response): Promise<void> => {
-
     try {
         const { error } = studentSchema.validate({ ...req.body });
         if (error) {
@@ -131,11 +125,14 @@ export const updateStudent = async (req: Request, res: Response): Promise<void> 
             return;
         }
 
-        const updatedStudent = await StudentModel.findByIdAndUpdate(req.params.id, { ...req.body }, { new: true });
-        if (!updatedStudent) {
+        const student = await StudentModel.findById(req.params.id);
+        if (!student) {
             res.status(404).json({ message: "Student not found" });
             return;
         }
+
+        const profilePicture = req.file ? `/uploads/${req.file.filename}` : student.profilePicture;
+        const updatedStudent = await StudentModel.findByIdAndUpdate(req.params.id, { ...req.body, profilePicture, }, { new: true });
         res.status(200).json(updatedStudent);
     }
     catch (err) {
@@ -146,9 +143,7 @@ export const updateStudent = async (req: Request, res: Response): Promise<void> 
 
 
 export const deleteStudent = (req: Request, res: Response): void => {
-
     const id = req.params.id;
-
     StudentModel.findByIdAndDelete({ _id: id })
         .then(result => res.json({ success: true, result }))
         .catch(err => res.status(500).json({ message: 'Error deleting student', error: err }));
@@ -156,9 +151,7 @@ export const deleteStudent = (req: Request, res: Response): void => {
 
 
 export const checkEmail = async (req: Request, res: Response): Promise<void> => {
-
     const { email, studentId } = req.body;
-
     try {
         let student;
         if (studentId) {

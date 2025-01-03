@@ -111,10 +111,11 @@ function UpdateStudent() {
                 acc[field] = { message: curr.message } as FieldError;
                 return acc;
             }, {} as Partial<Record<keyof Student, FieldError>>);
+
             Object.keys(newErrors).forEach((field) => {
-                const typedField = field as keyof Student; // Assert field as keyof Student
+                const typedField = field as keyof Student;
                 if (newErrors[typedField]) {
-                    setError(typedField, newErrors[typedField]!); // Type assertion ensures compatibility
+                    setError(typedField, newErrors[typedField]!);
                 }
             });
             return;
@@ -126,7 +127,10 @@ function UpdateStudent() {
         Object.entries(data).forEach(([key, value]) => {
             formData.append(key, value as string | Blob);
         });
-        if (selectedFile) formData.append('profilePicture', selectedFile);
+
+        if (selectedFile) {
+            formData.append('profilePicture', selectedFile);
+        }
 
         studentStore.updateStudent(id!, formData, token)
             .then(() => {
