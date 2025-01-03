@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Joi from 'joi';
 import Navbar from '../client/Navbar';
@@ -8,20 +7,32 @@ import { observer } from 'mobx-react';
 import '../../assets/admin/CreateStudent.css';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useForm } from 'react-hook-form';
+import { useForm, FieldError } from 'react-hook-form';
+
+type Student = {
+    id: string;
+    name: string;
+    surname: string;
+    birthdate: string;
+    rollno: number;
+    address: string;
+    email: string;
+    age: number;
+    profilePicture?: string;
+};
 
 function UpdateStudent() {
 
-    const { id } = useParams();
+    const { id } = useParams<{ id: string }>();
     const location = useLocation();
-    const student = studentStore.student;
+    const student = studentStore.student as Student | null;
     const navigate = useNavigate();
 
-    const [profilePicture, setProfilePicture] = useState(null);
-    const [selectedFile, setSelectedFile] = useState(null);
+    const [profilePicture, setProfilePicture] = useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-    const { register, handleSubmit, setValue, formState: { errors }, watch, setError, getValues } = useForm();
-    const birthdate = watch("birthdate");
+    const { register, handleSubmit, setValue, watch, setError, formState: { errors }, } = useForm<Student>();
+    const birthdate = watch('birthdate');
     const watchedData = watch();
     const initialData = student;
 
@@ -36,54 +47,56 @@ function UpdateStudent() {
     });
 
     useEffect(() => {
-        const token = localStorage.getItem('authToken');
-        studentStore.getStudentById(id, token);
+        const token = localStorage.getItem('authToken') || '';
+        studentStore.getStudentById(id!, token);
     }, [id]);
 
     useEffect(() => {
         if (student) {
-            setValue("name", student.name);
-            setValue("surname", student.surname);
-            setValue("birthdate", new Date(student.birthdate).toLocaleDateString('en-CA'));
-            setValue("rollno", student.rollno);
-            setValue("address", student.address);
-            setValue("email", student.email);
-            setValue("age", student.age);
-            setProfilePicture(student.profilePicture);
+            setValue('name', student.name);
+            setValue('surname', student.surname);
+            setValue('birthdate', new Date(student.birthdate).toISOString().split('T')[0]);
+            setValue('rollno', student.rollno);
+            setValue('address', student.address);
+            setValue('email', student.email);
+            setValue('age', student.age);
+            setProfilePicture(student.profilePicture || null);
         }
     }, [student, setValue]);
 
-    const calculateAge = (birthdate) => {
+    const calculateAge = (birthdate: string) => {
         const birthDate = new Date(birthdate);
-        const today = new Date;
+        const today = new Date();
         let age = today.getFullYear() - birthDate.getFullYear();
         const monthDiff = today.getMonth() - birthDate.getMonth();
         if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
             age--;
         }
         return age;
-    }
+    };
 
     useEffect(() => {
         if (birthdate) {
-            setValue("age", calculateAge(birthdate));
+            setValue('age', calculateAge(birthdate));
         }
     }, [birthdate, setValue]);
 
-    const handleFileChange = (e) => {
-        setSelectedFile(e.target.files[0]);
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        setSelectedFile(file);
         setProfilePicture(null);
     };
 
-    const onSubmit = (data) => {
+    const onSubmit = (data: Student) => {
+
         const isUnchanged = Object.keys(watchedData).every((key) => {
-            if (key === "birthdate") {
-                return new Date(watchedData[key]).toLocaleDateString() === new Date(initialData[key]).toLocaleDateString();
+            if (key === 'birthdate') {
+                return new Date(watchedData[key as keyof Student] as string).toISOString() === new Date(initialData![key as keyof Student] as string).toISOString();
             }
-            if (key === "profilePicture") {
-                return !selectedFile && watchedData[key] === initialData[key];
+            if (key === 'profilePicture') {
+                return !selectedFile && watchedData[key as keyof Student] === initialData![key as keyof Student];
             }
-            return watchedData[key] === initialData[key];
+            return watchedData[key as keyof Student] === initialData![key as keyof Student];
         });
 
         if (!selectedFile && isUnchanged) {
@@ -93,36 +106,40 @@ function UpdateStudent() {
 
         const { error } = studentSchema.validate(data, { abortEarly: false });
         if (error) {
-            const newErrors = error.details.reduce((acc, curr) => {
-                acc[curr.path[0]] = curr.message;
+            const newErrors: Partial<Record<keyof Student, FieldError>> = error.details.reduce((acc, curr) => {
+                const field = curr.path[0] as keyof Student;
+                acc[field] = { message: curr.message } as FieldError;
                 return acc;
-            }, {});
-            for (const field in newErrors) {
-                setError(field, { message: newErrors[field] });
-            }
+            }, {} as Partial<Record<keyof Student, FieldError>>);
+            Object.keys(newErrors).forEach((field) => {
+                const typedField = field as keyof Student; // Assert field as keyof Student
+                if (newErrors[typedField]) {
+                    setError(typedField, newErrors[typedField]!); // Type assertion ensures compatibility
+                }
+            });
             return;
         }
 
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem('authToken') || '';
         const formData = new FormData();
 
         Object.entries(data).forEach(([key, value]) => {
-            formData.append(key, value);
+            formData.append(key, value as string | Blob);
         });
-        if (selectedFile) formData.append("profilePicture", selectedFile);
+        if (selectedFile) formData.append('profilePicture', selectedFile);
 
-        studentStore.updateStudent(id, formData, token)
+        studentStore.updateStudent(id!, formData, token)
             .then(() => {
-                navigate("/", {
+                navigate('/', {
                     state: {
                         toastMessage: 'Student updated successfully!',
-                        page: location.state?.fromPage || 1
-                    }
+                        page: location.state?.fromPage || 1,
+                    },
                 });
             })
             .catch((error) => {
                 if (error.message) {
-                    setError("email", { message: error.message || 'Email is already taken' });
+                    setError('email', { message: error.message || 'Email is already taken' });
                 } else {
                     toast.error('Unexpected error occurred.');
                 }
@@ -171,7 +188,7 @@ function UpdateStudent() {
 
                         <div className='col-md-6'>
                             <label htmlFor="">Address : </label>
-                            <textarea type="text" {...register("address")} className="form-control" placeholder='Enter Address' />
+                            <textarea {...register("address")} className="form-control" placeholder='Enter Address' />
                             {errors.address && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.address.message}</div>}
                         </div>
 

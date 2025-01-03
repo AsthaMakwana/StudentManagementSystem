@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useForm, SubmitHandler, FieldValues } from 'react-hook-form';
 import Joi from 'joi';
 import Navbar from '../client/Navbar';
 import studentStore from '../../mobx/studentStore';
@@ -9,13 +9,23 @@ import '../../assets/admin/CreateStudent.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+interface ICreateStudentForm {
+    name: string;
+    surname: string;
+    birthdate: string;
+    rollno: number;
+    address: string;
+    email: string;
+    age: number;
+}
+
 function CreateStudent() {
 
     const location = useLocation();
     const navigate = useNavigate();
 
-    const [profilePicture, setProfilePicture] = useState(null);
-    const { register, handleSubmit, setValue, watch, formState: { errors }, setError } = useForm();
+    const [profilePicture, setProfilePicture] = useState<File | null>(null);
+    const { register, handleSubmit, setValue, watch, formState: { errors }, setError } = useForm<ICreateStudentForm>();
 
     const birthdate = watch("birthdate");
 
@@ -29,7 +39,7 @@ function CreateStudent() {
         age: Joi.number().integer().min(1).required().messages({ 'number.base': 'Age is required', 'number.empty': 'Age is required', 'number.min': 'Age must be at least 1', 'any.required': 'Age is required' }),
     });
 
-    const calculateAge = (birthdate) => {
+    const calculateAge = (birthdate: string): number => {
         const birthDate = new Date(birthdate);
         const today = new Date();
         let age = today.getFullYear() - birthDate.getFullYear();
@@ -47,25 +57,26 @@ function CreateStudent() {
         }
     }, [birthdate, setValue]);
 
-    const handleFileChange = (e) => {
-        setProfilePicture(e.target.files[0]);
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            setProfilePicture(e.target.files[0]);
+        }
     };
 
-    const onSubmit = async (data) => {
+    const onSubmit: SubmitHandler<ICreateStudentForm> = async (data: ICreateStudentForm) => {
         const { error } = studentSchema.validate(data, { abortEarly: false });
-
         if (error) {
             const newErrors = error.details.reduce((acc, curr) => {
                 acc[curr.path[0]] = curr.message;
                 return acc;
-            }, {});
+            }, {} as Record<string, string>);
             for (const field in newErrors) {
-                setError(field, { message: newErrors[field] });
+                setError(field as keyof ICreateStudentForm, { message: newErrors[field] });
             }
             return;
         }
 
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem('authToken') || '';
         const formData = new FormData();
 
         Object.entries(data).forEach(([key, value]) => {
@@ -84,7 +95,7 @@ function CreateStudent() {
                 });
             }
         }
-        catch (error) {
+        catch (error: any) {
             if (error.message) {
                 setError("email", { message: error.message || 'Email is already taken' });
             } else {

@@ -36,62 +36,6 @@ const storage = multer_1.default.diskStorage({
     }
 });
 const upload = (0, multer_1.default)({ storage: storage });
-// export const createStudent = async(req: Request, res: Response): Promise<void> => {
-//     const { error } = studentSchema.validate({
-//         name: req.body.name,
-//         surname: req.body.surname,
-//         birthdate: req.body.birthdate,
-//         rollno: req.body.rollno,
-//         address: req.body.address,
-//         email: req.body.email,
-//         age: req.body.age,
-//         profilePicture: req.body.profilePicture
-//     });
-//     if (error) {
-//         res.status(400).json({ message: error.details[0].message });
-//         return;
-//     }
-//     // const newStudent = new StudentModel({
-//     //     name: req.body.name,
-//     //     surname: req.body.surname,
-//     //     birthdate: req.body.birthdate,
-//     //     rollno: req.body.rollno,
-//     //     address: req.body.address,
-//     //     email: req.body.email,
-//     //     age: req.body.age,
-//     //     profilePicture: req.file ? `/uploads/${req.file.filename}` : null,
-//     // });
-//     // newStudent.save()
-//     //     .then(student => res.json(student))
-//     //     .catch(err => res.status(500).json({ message: 'Error creating student', error: err }));
-//     try {
-//         // Check if the email already exists
-//         const existingStudent = await StudentModel.findOne({ email: req.body.email });
-//         if (existingStudent) {
-//             res.status(400).json({ message: "Email is already taken" });
-//             return;
-//         }
-//         // Create new student
-//         const newStudent = new StudentModel({
-//             name: req.body.name,
-//             surname: req.body.surname,
-//             birthdate: req.body.birthdate,
-//             rollno: req.body.rollno,
-//             address: req.body.address,
-//             email: req.body.email,
-//             age: req.body.age,
-//             profilePicture: req.file ? `/uploads/${req.file.filename}` : null,
-//         });
-//         // Save student to the database
-//         await newStudent.save();
-//         res.status(201).json(newStudent); // Return the newly created student
-//     } catch (err) {
-//         console.error(err);
-//         if (!res.headersSent) { // Ensure headers are not already sent before sending an error response
-//             res.status(500).json({ message: 'Error creating student', error: err });
-//         }
-//     }
-// };
 const createStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { error } = studentSchema.validate(Object.assign({}, req.body));
@@ -99,13 +43,11 @@ const createStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             res.status(400).json({ message: error.details[0].message });
             return;
         }
-        // Check if the email already exists
         const existingStudent = yield Students_1.default.findOne({ email: req.body.email });
         if (existingStudent) {
             res.status(400).json({ message: "Email already in use" });
             return;
         }
-        // Create the new student
         const newStudent = new Students_1.default({
             name: req.body.name,
             surname: req.body.surname,
@@ -170,27 +112,6 @@ const getStudentById = (req, res) => {
         .catch(err => res.status(500).json({ message: 'Error fetching student', error: err }));
 };
 exports.getStudentById = getStudentById;
-// export const updateStudent = (req: Request, res: Response): void => {
-//     const { error } = studentSchema.validate(req.body);
-//     if (error) {
-//         res.status(400).json({ message: error.details[0].message });
-//         return;
-//     }
-//     const id = req.params.id;
-//     const profilePicture = req.file ? `/uploads/${req.file.filename}` : req.body.profilePicture;
-//     StudentModel.findByIdAndUpdate({ _id: id }, {
-//         name: req.body.name,
-//         surname: req.body.surname,
-//         birthdate: req.body.birthdate,
-//         rollno: req.body.rollno,
-//         address: req.body.address,
-//         email: req.body.email,
-//         age: req.body.age,
-//         profilePicture: profilePicture
-//     })
-//         .then(student => res.json(student))
-//         .catch(err => res.status(500).json({ message: 'Error updating student', error: err }));
-// };
 const updateStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { error } = studentSchema.validate(Object.assign({}, req.body));
@@ -198,14 +119,11 @@ const updateStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             res.status(400).json({ message: error.details[0].message });
             return;
         }
-        // Check if the email already exists and isn't the current student's email
         const existingStudent = yield Students_1.default.findOne({ email: req.body.email });
-        if (existingStudent &&
-            existingStudent._id.toString() !== req.params.id) {
+        if (existingStudent && existingStudent._id.toString() !== req.params.id) {
             res.status(400).json({ message: "Email already in use" });
             return;
         }
-        // Update student
         const updatedStudent = yield Students_1.default.findByIdAndUpdate(req.params.id, Object.assign({}, req.body), { new: true });
         if (!updatedStudent) {
             res.status(404).json({ message: "Student not found" });
