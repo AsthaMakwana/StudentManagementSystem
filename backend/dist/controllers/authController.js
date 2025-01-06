@@ -30,6 +30,11 @@ const signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             res.status(400).json({ error: 'Email already in use' });
             return;
         }
+        const existingUsername = yield userModel_1.default.findOne({ username });
+        if (existingUsername) {
+            res.status(400).json({ error: 'Username already in use' });
+            return;
+        }
         const salt = yield bcryptjs_1.default.genSalt(10);
         const hashedPassword = yield bcryptjs_1.default.hash(password, salt);
         const userRole = role === 'admin' ? 'admin' : 'user';
