@@ -89,6 +89,7 @@ const Students: React.FC = observer(() => {
 
     const handleBulkDelete = () => {
         const token = localStorage.getItem("authToken") || "";
+        
         if (selectedStudentIds.length > 0) {
             const isConfirmed = window.confirm('Are you sure you want to delete selected students?');
             if (isConfirmed) {

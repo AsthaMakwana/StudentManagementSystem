@@ -190,7 +190,7 @@ function UpdateStudent() {
                             {errors.rollno && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.rollno.message}</div>}
                         </div>
 
-                        <div className='col-md-6'>
+                        <div className='col-12'>
                             <label htmlFor="">Address : </label>
                             <textarea {...register("address")} className="form-control" placeholder='Enter Address' />
                             {errors.address && <div className="text-danger mt-1" style={{ fontSize: "0.9rem" }}>{errors.address.message}</div>}

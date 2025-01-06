@@ -108,7 +108,7 @@ const LoginSignup: React.FC = () => {
   };
 
   return (
-    <div className="container w-50">
+    <div className="container w-75">
       <ToastContainer />
 
       {isLoginMode ? (

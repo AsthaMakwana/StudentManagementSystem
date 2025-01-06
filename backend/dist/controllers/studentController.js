@@ -114,7 +114,6 @@ const getStudentById = (req, res) => {
 exports.getStudentById = getStudentById;
 const updateStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log('Response', req.file);
         const { error } = studentSchema.validate(Object.assign({}, req.body));
         if (error) {
             res.status(400).json({ message: error.details[0].message });
@@ -132,7 +131,6 @@ const updateStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         }
         const profilePicture = req.file ? `/uploads/${req.file.filename}` : student.profilePicture;
         const updatedStudent = yield Students_1.default.findByIdAndUpdate(req.params.id, Object.assign(Object.assign({}, req.body), { profilePicture }), { new: true });
-        console.log(updatedStudent);
         res.status(200).json(updatedStudent);
     }
     catch (err) {

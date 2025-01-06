@@ -20,6 +20,11 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
             res.status(400).json({ error: 'Email already in use' });
             return;
         }
+        const existingUsername = await User.findOne({ username });
+        if (existingUsername) {
+            res.status(400).json({ error: 'Username already in use' });
+            return;
+        }
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
         const userRole = role === 'admin' ? 'admin' : 'user';
