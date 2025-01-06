@@ -74,60 +74,69 @@ const Students: React.FC = observer(() => {
     const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
             const visibleIds = students.map((student: Student) => student._id);
-            setSelectedStudentIds((prev) => Array.from(new Set([...prev, ...visibleIds])));
+            setSelectedStudentIds(visibleIds);
         }
         else {
-            const visibleIds = students.map((student: Student) => student._id);
-            setSelectedStudentIds((prev) => prev.filter((id) => !visibleIds.includes(id)));
+            setSelectedStudentIds([]);
         }
     };
 
     const isAllSelected = (): boolean => {
         const visibleIds = students.map((student: Student) => student._id);
-        return visibleIds.every((id) => selectedStudentIds.includes(id));
+        return visibleIds.length > 0 && visibleIds.every((id) => selectedStudentIds.includes(id));
     };
 
-    const handleBulkDelete = () => {
-        const token = localStorage.getItem("authToken") || "";
-        
-        if (selectedStudentIds.length > 0) {
-            const isConfirmed = window.confirm('Are you sure you want to delete selected students?');
-            if (isConfirmed) {
-                selectedStudentIds.forEach((id) => {
-                    deleteStudent(id, token);
-                });
-                setTimeout(() => {
-                    setSelectedStudentIds([]);
-                    setStudents(
-                        currentPage,
-                        studentsPerPage,
-                        searchQuery,
-                        ageFilter,
-                        token,
-                    );
-                }, 500);
-            }
-        }
-        else {
+    const handleBulkDelete = async () => {
+
+        if (selectedStudentIds.length === 0) {
             toast.error('No students selected for deletion');
+            return;
+        }
+
+        const isConfirmed = window.confirm("Are you sure you want to delete selected students?");
+        if (isConfirmed) {
+            const token = localStorage.getItem("authToken") || "";
+            await Promise.all(selectedStudentIds.map((id) => deleteStudent(id, token)));
+            const remainingStudents = students.filter(
+                (student) => !selectedStudentIds.includes(student._id)
+            );
+            const isPageEmpty = remainingStudents.length === 0;
+            setSelectedStudentIds([]);
+
+            if (isPageEmpty && currentPage > 1) {
+                const newPage = currentPage - 1;
+                setCurrentPage(newPage);
+                await setStudents(newPage, studentsPerPage, token, searchQuery, ageFilter);
+            } else {
+                await setStudents(currentPage, studentsPerPage, token, searchQuery, ageFilter);
+            }
+
+            toast.success("Selected students deleted successfully");
         }
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
+
         const isConfirmed = window.confirm("Are you sure you want to remove this student?");
         if (isConfirmed) {
             const token = localStorage.getItem("authToken") || "";
-            deleteStudent(id, token);
-            setStudents(
-                currentPage,
-                studentsPerPage,
-                searchQuery,
-                ageFilter,
-                token,
-            );
+            await deleteStudent(id, token);
+
+            const remainingStudents = students.filter((student) => student._id !== id);
+            const isPageEmpty = remainingStudents.length === 0;
+
+            if (isPageEmpty && currentPage > 1) {
+                const newPage = currentPage - 1;
+                setCurrentPage(newPage);
+                await setStudents(newPage, studentsPerPage, token, searchQuery, ageFilter);
+            }
+            else {
+                await setStudents(currentPage, studentsPerPage, token, searchQuery, ageFilter);
+            }
             toast.success("Student deleted successfully");
         }
     };
+
 
     const handleShowStudentDetails = (student: Student) => {
         setSelectedStudent(student);

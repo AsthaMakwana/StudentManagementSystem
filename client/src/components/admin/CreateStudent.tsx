@@ -164,7 +164,6 @@ function CreateStudent() {
                         <div className="col-12">
                             <label htmlFor="profilePicture" className="form-label fw-bold text-secondary"> Profile Picture: </label>
                             <input type="file" className="form-control" accept="image/*" onChange={handleFileChange} />
-                            {profilePicture && (<small className="text-muted mt-1"> Selected: {profilePicture.name}</small>)}
                         </div>
 
                         <div className="col-12 text-center">
