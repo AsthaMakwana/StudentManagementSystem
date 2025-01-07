@@ -1,9 +1,9 @@
-import { StrictMode } from 'react';
+import studentStore from './mobx/studentStore';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'mobx-react';
-import App from './App';
-import studentStore from './mobx/studentStore';
+import { StrictMode } from 'react';
 import React from 'react';
+import App from './App';
 
 const rootElement = document.getElementById('root');
 if (rootElement) {

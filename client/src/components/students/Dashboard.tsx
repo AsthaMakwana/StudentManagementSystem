@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { observer } from "mobx-react-lite";
-import studentStore from "../../mobx/studentStore";
-import authStore from "../../mobx/authStore";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import studentStore from "../../mobx/studentStore";
+import React, { useState, useEffect } from "react";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import '../../assets/students/Dashboard.css';
+import authStore from "../../mobx/authStore";
+import { observer } from "mobx-react-lite";
+import { Pie } from 'react-chartjs-2';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Dashboard: React.FC = observer(() => {
-
     const { students, loading, setStudents } = studentStore;
     const [totalStudents, setTotalStudents] = useState<number>(0);
     const [commonAgeGroup, setCommonAgeGroup] = useState<string>('');
@@ -89,6 +87,7 @@ const Dashboard: React.FC = observer(() => {
     return (
         <div className="dashboard-container">
             <ToastContainer />
+
             <div className="dashboard-header">
                 <div className="total-students">
                     <h2>Total Students: {totalStudents}</h2>
@@ -96,11 +95,6 @@ const Dashboard: React.FC = observer(() => {
                 <div className="common-age-group">
                     <h3>Most Common Age Group: {commonAgeGroup}</h3>
                 </div>
-                {user && user.role === 'admin' && (
-                    <Link to="/create" className="btn btn-success">
-                        Add New Student
-                    </Link>
-                )}
             </div>
 
             <div className="dashboard-content">

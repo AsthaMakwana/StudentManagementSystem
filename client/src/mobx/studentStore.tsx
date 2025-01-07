@@ -1,5 +1,5 @@
-import { makeAutoObservable } from "mobx";
 import axios, { AxiosResponse } from "axios";
+import { makeAutoObservable } from "mobx";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 

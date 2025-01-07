@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import Joi from 'joi';
-import Navbar from '../Navbar';
-import studentStore from '../../mobx/studentStore';
-import { observer } from 'mobx-react';
-import '../../assets/students/CreateStudent.css';
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { useForm, FieldError } from 'react-hook-form';
+import studentStore from '../../mobx/studentStore';
+import React, { useState, useEffect } from 'react';
+import '../../assets/students/CreateStudent.css';
+import 'react-toastify/dist/ReactToastify.css';
+import { observer } from 'mobx-react';
+import Joi from 'joi';
 
 type Student = {
     id: string;
@@ -155,13 +154,18 @@ function UpdateStudent() {
             <div className='d-flex vh-70 justify-content-center align-items-center bg-overlay mt-5'>
                 <div className="card shadow-lg rounded-3 p-4" style={{ width: "90%", maxWidth: "800px", background: "rgba(255, 255, 255, 0.9)" }}>
 
-                    <button className="btn btn-outline-primary mb-4 w-25" onClick={() => navigate(`/students`, { state: { page: location.state?.fromPage || 1 } })}
-                        style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}> ← Back
-                    </button>
+                    <div className="d-flex justify-content-start mb-4">
+                        <button
+                            className="btn btn-outline-custom"
+                            onClick={() => navigate(`/students`, { state: { page: location.state?.fromPage || 1 } })}
+                            style={{ width: "100px", display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+                            ← Back
+                        </button>
+                    </div>
 
                     <form onSubmit={handleSubmit(onSubmit)} className="row g-4">
 
-                        <h2 className="text-center text-primary fw-bold mb-3">Update Student</h2>
+                        <h2 className="text-center text-custom fw-bold mb-3">Update Student</h2>
 
                         <div className='col-md-6'>
                             <label htmlFor="">Name : </label>
@@ -212,14 +216,11 @@ function UpdateStudent() {
                                 {profilePicture && !selectedFile && (
                                     <div>Current Profile Picture: {profilePicture.split('/').pop()}</div>
                                 )}
-                                {selectedFile && (
-                                    <div>Selected: {selectedFile.name}</div>
-                                )}
                             </div>
                         </div>
 
                         <div className="col-12 text-center">
-                            <button className="btn btn-primary w-50 fw-bold py-2" style={{ fontSize: "1.1rem" }}>
+                            <button className="btn submit-btn w-50 fw-bold py-2" style={{ fontSize: "1.1rem" }}>
                                 Update
                             </button>
                         </div>

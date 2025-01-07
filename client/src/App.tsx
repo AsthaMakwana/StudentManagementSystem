@@ -1,15 +1,14 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
-import { Navigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import LoginSignup from './components/auth/LoginSignup';
-import Students from './components/students/Students';
 import CreateStudent from './components/students/CreateStudent';
 import UpdateStudent from './components/students/UpdateStudent';
-import './App.css';
-//
-import Layout from './components/Layout';
+import LoginSignup from './components/auth/LoginSignup';
 import Dashboard from './components/students/Dashboard';
+import Students from './components/students/Students';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Navigate } from 'react-router-dom';
+import Layout from './components/Layout';
+import React from 'react';
+import './App.css';
 
 type ProtectedRouteProps = {
   children: React.ReactNode;

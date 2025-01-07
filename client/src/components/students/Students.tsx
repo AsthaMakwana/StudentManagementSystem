@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaEdit, FaTrash } from 'react-icons/fa';
-import { FiInfo } from 'react-icons/fi';
-import { observer } from 'mobx-react-lite';
-import studentStore from '../../mobx/studentStore';
-import '../../assets/students/Students.css';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
 import StudentDetailsModal from './StudentDetailsModal';
+import { toast, ToastContainer } from 'react-toastify';
+import React, { useEffect, useState } from 'react';
+import studentStore from '../../mobx/studentStore';
+import 'react-toastify/dist/ReactToastify.css';
 import authStore from '../../mobx/authStore';
+import '../../assets/students/Students.css';
+import { observer } from 'mobx-react-lite';
+import { FiInfo } from 'react-icons/fi';
 
 interface Student {
     _id: string;
@@ -86,7 +86,6 @@ const Students: React.FC = observer(() => {
     };
 
     const handleBulkDelete = async () => {
-
         if (selectedStudentIds.length === 0) {
             toast.error('No students selected for deletion');
             return;
@@ -106,10 +105,10 @@ const Students: React.FC = observer(() => {
                 const newPage = currentPage - 1;
                 setCurrentPage(newPage);
                 await setStudents(newPage, studentsPerPage, token, searchQuery, ageFilter);
-            } else {
+            }
+            else {
                 await setStudents(currentPage, studentsPerPage, token, searchQuery, ageFilter);
             }
-
             toast.success("Selected students deleted successfully");
         }
     };
@@ -148,24 +147,25 @@ const Students: React.FC = observer(() => {
     return (
         <div>
             <div className="logout-button"></div>
-            <div className="w-100 bg-white rounded p-3">
+            <div className="table-container bg-white shadow rounded p-4">
                 <ToastContainer />
-                <h1 style={{ textAlign: 'center' }}>Students</h1>
-
-                {user ? (
-                    <>
-                        {user.role === 'admin' && (
-                            <>
-                                <Link to="/create" state={{ fromPage: currentPage }} className="btn btn-success mb-3">Add Student</Link>
-                                <button className="btn btn-danger mb-3 ms-3" onClick={handleBulkDelete}>
-                                    Delete Selected
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h1 className="text-center mb-0">Students</h1>
+                    {user ? (
+                        user.role === 'admin' && (
+                            <div className="d-flex gap-2">
+                                <Link to="/create" state={{ fromPage: currentPage }} className="btn btn-primary btn-custom">
+                                    <FaPlus className="me-2" /> Add Student
+                                </Link>
+                                <button className="btn btn-danger btn-custom" onClick={handleBulkDelete}>
+                                    <FaTrash className="me-2" /> Delete Selected
                                 </button>
-                            </>
-                        )}
-                    </>
-                ) : (
-                    <p>Please log in to see the dashboard.</p>
-                )}
+                            </div>
+                        )
+                    ) : (
+                        <p>Please log in to see the dashboard.</p>
+                    )}
+                </div>
 
                 <div className="mb-3">
                     <label htmlFor="ageFilter" className="form-label">Filter by Age</label>
@@ -184,40 +184,26 @@ const Students: React.FC = observer(() => {
                     <input type="text" className="form-control" placeholder="Search by name, surname, or email" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                 </div>
 
-                <div className='table-responsive'>
-                    <table className="table text-center">
-                        <thead>
+                <div className="table-responsive">
+                    <table className="table table-bordered table-hover text-center align-middle">
+                        <thead className="table-dark">
                             <tr>
-                                {user && user.role === 'admin' && (
-                                    <th>
-                                        <input type="checkbox" onChange={handleSelectAll} checked={isAllSelected()} />
-                                    </th>
-                                )}
+                                {user && user.role === 'admin' && <th><input type="checkbox" onChange={handleSelectAll} checked={isAllSelected()} /></th>}
                                 <th>Profile Picture</th>
                                 <th>Name</th>
                                 <th>Roll no</th>
-                                {user ? (
-                                    <>
-                                        {user.role === 'admin' && (
-                                            <th>Actions</th>
-                                        )}
-                                    </>
-                                ) : (
-                                    <th><p>Please log in to see the dashboard.</p></th>
-                                )}
+                                {user && user.role === 'admin' && <th>Actions</th>}
                             </tr>
                         </thead>
                         <tbody>
                             {(students || []).map(student => (
                                 <tr key={student._id}>
                                     {user && user.role === 'admin' && (
-                                        <td>
-                                            <input type="checkbox" checked={selectedStudentIds.includes(student._id)} onChange={() => handleSelectStudent(student._id)} />
-                                        </td>
+                                        <td><input type="checkbox" checked={selectedStudentIds.includes(student._id)} onChange={() => handleSelectStudent(student._id)} /></td>
                                     )}
                                     <td>
                                         {student.profilePicture ? (
-                                            <img src={`http://localhost:3001${student.profilePicture}`} alt="Profile" style={{ width: '50px', height: '50px', borderRadius: '50%' }} />
+                                            <img src={`http://localhost:3001${student.profilePicture}`} alt="Profile" className="rounded-circle" style={{ width: '50px', height: '50px' }} />
                                         ) : (
                                             <span>No Image</span>
                                         )}
@@ -225,17 +211,17 @@ const Students: React.FC = observer(() => {
                                     <td>{student.name}</td>
                                     <td>{student.rollno}</td>
                                     {user && user.role === 'admin' && (
-                                        <td className="justify-content-center">
+                                        <td>
                                             <Link to={`/update/${student._id}`} state={{ fromPage: currentPage }}>
-                                                <button className='btn btn-light me-2' title="Edit">
-                                                    <FaEdit size={20} style={{ color: 'black' }} />
+                                                <button className="btn btn-light me-2" title="Edit">
+                                                    <FaEdit size={20} />
                                                 </button>
                                             </Link>
-                                            <button className='btn btn-light me-2' title="More Info" onClick={() => handleShowStudentDetails(student)}>
+                                            <button className="btn btn-light me-2" title="More Info" onClick={() => handleShowStudentDetails(student)}>
                                                 <FiInfo size={20} />
                                             </button>
-                                            <button className='btn btn-light me-2' onClick={() => handleDelete(student._id)} title="Delete">
-                                                <FaTrash size={20} style={{ color: 'black' }} />
+                                            <button className="btn btn-light" title="Delete" onClick={() => handleDelete(student._id)}>
+                                                <FaTrash size={20} />
                                             </button>
                                         </td>
                                     )}
@@ -248,21 +234,15 @@ const Students: React.FC = observer(() => {
                 <nav>
                     <ul className="pagination justify-content-center">
                         <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                            <button className="page-link" aria-label="Previous" onClick={() => currentPage > 1 && paginate(currentPage - 1)} disabled={currentPage === 1}>
-                                Previous
-                            </button>
+                            <button className="page-link" onClick={() => paginate(currentPage - 1)}>Previous</button>
                         </li>
                         {Array.from({ length: totalPages }, (_, index) => (
-                            <li key={index + 1} className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}>
-                                <button className="page-link" onClick={() => paginate(index + 1)}>
-                                    {index + 1}
-                                </button>
+                            <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
+                                <button className="page-link" onClick={() => paginate(index + 1)}>{index + 1}</button>
                             </li>
                         ))}
                         <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                            <button className="page-link" aria-label="Next" onClick={() => currentPage < totalPages && paginate(currentPage + 1)} disabled={currentPage === totalPages}>
-                                Next
-                            </button>
+                            <button className="page-link" onClick={() => paginate(currentPage + 1)}>Next</button>
                         </li>
                     </ul>
                 </nav>
@@ -270,6 +250,5 @@ const Students: React.FC = observer(() => {
             <StudentDetailsModal student={selectedStudent} closeModal={() => setSelectedStudent(null)} />
         </div>
     )
-
 });
 export default Students;

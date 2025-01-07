@@ -1,9 +1,9 @@
+import StudentModel from '../models/Students';
 import { Request, Response } from 'express';
-import Joi from 'joi';
+import { Types } from "mongoose";
 import multer from 'multer';
 import path from 'path';
-import StudentModel from '../models/Students';
-import { Types } from "mongoose";
+import Joi from 'joi';
 
 const studentSchema = Joi.object({
     name: Joi.string().min(3).max(30).required(),

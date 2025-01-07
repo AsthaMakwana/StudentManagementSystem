@@ -1,8 +1,8 @@
+import { createStudent, getStudents, getStudentById, updateStudent, deleteStudent, checkEmail } from '../controllers/studentController';
+import { protect, adminOnly } from '../middleware/authMiddleware';
 import express, { Request } from 'express';
 import multer from 'multer';
 import path from 'path';
-import { protect, adminOnly } from '../middleware/authMiddleware';
-import { createStudent, getStudents, getStudentById, updateStudent, deleteStudent, checkEmail } from '../controllers/studentController';
 
 const storage = multer.diskStorage({
     destination: function (req: Request, file: Express.Multer.File, cb: Function) {

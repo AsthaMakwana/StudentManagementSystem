@@ -1,6 +1,6 @@
-import React from "react";
-import { FaTimes } from "react-icons/fa";
 import '../../assets/students/StudentsDetails.css';
+import { FaTimes } from "react-icons/fa";
+import React from "react";
 
 interface Student {
     profilePicture?: string | null;

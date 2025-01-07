@@ -98,20 +98,21 @@
 }
 
 .form select {
-  height: 50px;              
-  width: 100%;               
-  margin-bottom: 1.2rem;     
-  padding: 0 15px;           
-  font-size: 16px;           
-  border: 2px solid #ddd;   
-  border-radius: 10px;      
-  outline: none;            
-  transition: border 0.3s ease; 
+  height: 50px;
+  width: 100%;
+  margin-bottom: 1.2rem;
+  padding: 0 15px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  outline: none;
+  transition: border 0.3s ease;
 }
 
 .form select:focus {
   border-color: #1db954;
 }
+
 .form {
   padding: 3rem 2rem;
   display: none;
@@ -126,4 +127,3 @@
 .form input:focus::placeholder {
   visibility: hidden;
 }
-
