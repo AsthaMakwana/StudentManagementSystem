@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../../assets/client/LoginSignup.css';
+import '../../assets/auth/LoginSignup.css';
 import { observer } from 'mobx-react-lite';
 import authStore from '../../mobx/authStore';
 import { toast, ToastContainer } from 'react-toastify';
@@ -60,7 +60,7 @@ const LoginSignup: React.FC = () => {
       if (authStore.status === 'succeeded') {
         toast.success('Login successful!');
         setTimeout(() => {
-          navigate('/');
+          navigate('/dashboard');
         }, 1000);
       }
       else {
@@ -80,7 +80,7 @@ const LoginSignup: React.FC = () => {
       if (authStore.status === 'succeeded') {
         toast.success('Signup successful!');
         setTimeout(() => {
-          navigate('/');
+          navigate('/dashboard');
         }, 1000);
       }
       else {

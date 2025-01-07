@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { observer } from "mobx-react-lite";
-import authStore from "../../mobx/authStore";
+import authStore from "../mobx/authStore";
 import { Modal } from "react-bootstrap";
 
 const Navbar: React.FC = observer(() => {

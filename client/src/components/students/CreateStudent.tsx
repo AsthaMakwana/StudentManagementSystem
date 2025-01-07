@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm, SubmitHandler, FieldValues } from 'react-hook-form';
 import Joi from 'joi';
-import Navbar from '../client/Navbar';
+import Navbar from '../Navbar';
 import studentStore from '../../mobx/studentStore';
 import { observer } from 'mobx-react';
-import '../../assets/admin/CreateStudent.css';
+import '../../assets/students/CreateStudent.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -87,7 +87,7 @@ function CreateStudent() {
         try {
             const createdStudent = await studentStore.createStudent(formData, token);
             if (createdStudent) {
-                navigate("/", {
+                navigate("/students", {
                     state: {
                         toastMessage: "Student added successfully!",
                         page: location.state?.fromPage || 1,
@@ -106,12 +106,10 @@ function CreateStudent() {
 
     return (
         <div>
-            <Navbar />
-
             <div className="d-flex vh-70 justify-content-center align-items-center bg-overlay mt-5">
                 <div className="card shadow-lg rounded-3 p-4" style={{ width: "90%", maxWidth: "800px", background: "rgba(255, 255, 255, 0.9)" }}>
 
-                    <button className="btn btn-outline-primary mb-4 w-25" onClick={() => navigate(`/`, { state: { page: location.state?.fromPage || 1 } })}
+                    <button className="btn btn-outline-primary mb-4 w-25" onClick={() => navigate(`/students`, { state: { page: location.state?.fromPage || 1 } })}
                         style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}> ← Back
                     </button>
 
