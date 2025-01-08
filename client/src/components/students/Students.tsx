@@ -144,6 +144,7 @@ const Students: React.FC = observer(() => {
         setCurrentPage(Math.min(pageNumber, totalPages));
     };
 
+
     return (
         <div>
             <div className="logout-button"></div>

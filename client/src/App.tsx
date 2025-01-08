@@ -25,6 +25,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/login" element={<LoginSignup />} />
         <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+          <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="students" element={<Students />} />
           <Route path="create" element={<CreateStudent />} />

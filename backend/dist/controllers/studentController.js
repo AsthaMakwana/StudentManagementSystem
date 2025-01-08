@@ -12,11 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkEmail = exports.deleteStudent = exports.updateStudent = exports.getStudentById = exports.getStudents = exports.createStudent = void 0;
-const joi_1 = __importDefault(require("joi"));
+exports.exportStudents = exports.checkEmail = exports.deleteStudent = exports.updateStudent = exports.getStudentById = exports.getStudents = exports.createStudent = void 0;
+const Students_1 = __importDefault(require("../models/Students"));
+const exceljs_1 = require("exceljs");
+const json2csv_1 = require("json2csv");
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
-const Students_1 = __importDefault(require("../models/Students"));
+const joi_1 = __importDefault(require("joi"));
 const studentSchema = joi_1.default.object({
     name: joi_1.default.string().min(3).max(30).required(),
     surname: joi_1.default.string().min(3).max(30).required(),
@@ -173,3 +175,70 @@ const checkEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.checkEmail = checkEmail;
+const exportStudents = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { format = 'csv', searchQuery, ageFilter } = req.query;
+        let query = {};
+        if (searchQuery) {
+            query = {
+                $or: [
+                    { name: { $regex: searchQuery, $options: "i" } },
+                    { surname: { $regex: searchQuery, $options: "i" } },
+                    { email: { $regex: searchQuery, $options: "i" } }
+                ]
+            };
+        }
+        if (ageFilter) {
+            const [minAge, maxAge] = ageFilter.split('-');
+            if (maxAge) {
+                query.age = { $gte: parseInt(minAge), $lte: parseInt(maxAge) };
+            }
+            else {
+                query.age = { $gte: parseInt(minAge) };
+            }
+        }
+        const students = yield Students_1.default.find(query);
+        if (format === 'excel') {
+            const workbook = new exceljs_1.Workbook();
+            const sheet = workbook.addWorksheet('Students');
+            sheet.columns = [
+                { header: 'Name', key: 'name' },
+                { header: 'Surname', key: 'surname' },
+                { header: 'Roll No', key: 'rollno' },
+                { header: 'Age', key: 'age' },
+                { header: 'Birthdate', key: 'birthdate' },
+                { header: 'Email', key: 'email' },
+                { header: 'Address', key: 'address' },
+            ];
+            sheet.addRows(students.map(student => ({
+                name: student.name,
+                surname: student.surname,
+                rollno: student.rollno,
+                age: student.age,
+                birthdate: student.birthdate,
+                email: student.email,
+                address: student.address,
+            })));
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', 'attachment; filename="students.xlsx"');
+            yield workbook.xlsx.write(res);
+            res.end();
+        }
+        else if (format === 'csv') {
+            const fields = ['name', 'surname', 'rollno', 'age', 'birthdate', 'email', 'address'];
+            const parser = new json2csv_1.Parser({ fields });
+            const csv = parser.parse(students);
+            res.setHeader('Content-Type', 'text/csv');
+            res.setHeader('Content-Disposition', 'attachment; filename="students.csv"');
+            res.send(csv);
+        }
+        else {
+            res.status(400).json({ message: 'Invalid format specified' });
+        }
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error exporting data', error });
+    }
+});
+exports.exportStudents = exportStudents;

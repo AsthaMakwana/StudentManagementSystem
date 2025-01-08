@@ -25,7 +25,7 @@ const LoginSignup: React.FC = () => {
   useEffect(() => {
     const tokenFromStorage = localStorage.getItem('authToken');
     if (tokenFromStorage && !isNavigated) {
-      navigate('/');
+      navigate('/dashboard');
       setIsNavigated(true);
     }
   }, [isNavigated, navigate]);
