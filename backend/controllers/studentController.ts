@@ -177,3 +177,62 @@ export const checkEmail = async (req: Request, res: Response): Promise<void> => 
         return;
     }
 };
+
+
+export const exportStudents = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { ageFilter, searchQuery, format = 'csv' } = req.query;
+        let query: any = {};
+        if (searchQuery) {
+            query = {
+                $or: [
+                    { name: { $regex: searchQuery, $options: 'i' } },
+                    { surname: { $regex: searchQuery, $options: 'i' } },
+                    { email: { $regex: searchQuery, $options: 'i' } },
+                ]
+            };
+        }
+        if (ageFilter) {
+            const ageRange = ageFilter as string;
+            const [minAge, maxAge] = ageRange.split('-');
+            if (maxAge) {
+                query.age = { $gte: parseInt(minAge), $lte: parseInt(maxAge) };
+            }
+            else {
+                query.age = { $gte: parseInt(minAge) };
+            }
+        }
+        const students = await StudentModel.find(query).lean();
+        if (format === 'excel') {
+            const workbook = new Workbook();
+            const worksheet = workbook.addWorksheet('Students');
+            worksheet.columns = [
+                { header: 'Name', key: 'name', width: 20 },
+                { header: 'Surname', key: 'surname', width: 20 },
+                { header: 'Age', key: 'age', width: 10 },
+                { header: 'Email', key: 'email', width: 30 },
+                { header: 'Address', key: 'address', width: 40 },
+                { header: 'Roll No', key: 'rollno', width: 10 },
+            ];
+            worksheet.addRows(students);
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', 'attachment; filename=students.xlsx');
+            await workbook.xlsx.write(res);
+            res.end();
+        }
+        else if (format === 'csv') {
+            const parser = new Parser();
+            const csv = parser.parse(students);
+            res.setHeader('Content-Type', 'text/csv');
+            res.setHeader('Content-Disposition', 'attachment; filename=students.csv');
+            res.send(csv);
+        }
+        else {
+            res.status(400).json({ message: 'Invalid format specified' });
+        }
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error exporting data', error });
+    }
+};

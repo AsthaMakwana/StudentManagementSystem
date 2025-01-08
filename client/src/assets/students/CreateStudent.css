@@ -1,6 +1,7 @@
 .btn-outline-custom {
   border-color: #343a40;
-  color: #343a40;
+  background-color: #23272b !important;
+  color: white !important;
   width: auto;
 }
 
@@ -32,18 +33,18 @@
   z-index: -1;
 }
 
-.submit-btn {
+form .submit-btn {
   background-color: #23272b;
   color: white;
   border: none;
 }
 
-.submit-btn:hover {
+form .submit-btn:hover {
   background-color: #23272b;
   color: white;
 }
 
-.submit-btn {
+form .submit-btn {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 

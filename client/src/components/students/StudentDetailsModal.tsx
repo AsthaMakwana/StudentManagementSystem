@@ -24,7 +24,7 @@ const StudentDetailsModal: React.FC<StudentDetailsModalProps> = ({ student, clos
 
     return (
         <div className="modal-overlay">
-            <div className="modal-content">
+            <div className="modal-conten">
 
                 <button className="close-btn" onClick={closeModal}>
                     <FaTimes size={20} />

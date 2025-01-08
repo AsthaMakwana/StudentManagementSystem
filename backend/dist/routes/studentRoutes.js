@@ -24,5 +24,5 @@ router.post("/createStudent", authMiddleware_1.protect, authMiddleware_1.adminOn
 router.put('/updateStudent/:id', authMiddleware_1.protect, authMiddleware_1.adminOnly, upload.single("profilePicture"), studentController_1.updateStudent);
 router.delete('/deleteStudent/:id', authMiddleware_1.protect, authMiddleware_1.adminOnly, studentController_1.deleteStudent);
 router.post('/checkEmail', authMiddleware_1.protect, studentController_1.checkEmail);
-router.get('export-students', authMiddleware_1.protect, authMiddleware_1.adminOnly, studentController_1.exportStudents);
+router.get('/export-students', authMiddleware_1.protect, authMiddleware_1.adminOnly, studentController_1.exportStudents);
 exports.default = router;

@@ -1,4 +1,4 @@
-import { createStudent, getStudents, getStudentById, updateStudent, deleteStudent, checkEmail } from '../controllers/studentController';
+import { createStudent, getStudents, getStudentById, updateStudent, deleteStudent, checkEmail, exportStudents } from '../controllers/studentController';
 import { protect, adminOnly } from '../middleware/authMiddleware';
 import express, { Request } from 'express';
 import multer from 'multer';
@@ -22,5 +22,6 @@ router.post("/createStudent", protect, adminOnly, upload.single("profilePicture"
 router.put('/updateStudent/:id', protect, adminOnly, upload.single("profilePicture"), updateStudent);
 router.delete('/deleteStudent/:id', protect, adminOnly, deleteStudent);
 router.post('/checkEmail', protect, checkEmail);
+router.get('/export-students', protect, adminOnly, exportStudents);
 
 export default router;

@@ -28,6 +28,7 @@ interface IStudentStore {
     setStudents(currentPage: number, studentsPerPage: number, token: string, searchQuery: string, ageFilter: string): Promise<void>;
     deleteStudent(id: string, token: string): Promise<void>;
     getStudentById(id: string, token: string): Promise<void>;
+    exportStudents(format: 'csv' | 'excel', searchQuery: string, ageFilter: string, token: string): Promise<void>;
 }
 
 class StudentStore implements IStudentStore {
@@ -129,6 +130,28 @@ class StudentStore implements IStudentStore {
         }
         catch (error) {
             this.error = (error as Error).message;
+        }
+    };
+
+    exportStudents = async (format: "csv" | "excel", searchQuery: string, ageFilter: string, token: string): Promise<void> => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/export-students`, {
+                headers: { Authorization: `Bearer ${token}` },
+                params: { format, searchQuery, ageFilter },
+                responseType: 'blob',
+            });
+
+            const blob = new Blob([response.data], { type: response.headers['content-type'] });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `students.${format === 'csv' ? 'csv' : 'xlsx'}`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } 
+         catch (error) {
+            console.error('Error exporting data:', error);
         }
     };
 }

@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaFileDownload, FaPlus, FaTrash } from 'react-icons/fa';
 import StudentDetailsModal from './StudentDetailsModal';
 import { toast, ToastContainer } from 'react-toastify';
 import React, { useEffect, useState } from 'react';
@@ -143,7 +143,10 @@ const Students: React.FC = observer(() => {
     const paginate = (pageNumber: number) => {
         setCurrentPage(Math.min(pageNumber, totalPages));
     };
-
+    const handleExport = async (format: 'csv' | 'excel') => {
+        const token = localStorage.getItem('authToken') || '';
+        await studentStore.exportStudents(format, searchQuery, ageFilter, token);
+    };
 
     return (
         <div>
@@ -160,6 +163,12 @@ const Students: React.FC = observer(() => {
                                 </Link>
                                 <button className="btn btn-danger btn-custom" onClick={handleBulkDelete}>
                                     <FaTrash className="me-2" /> Delete Selected
+                                </button>
+                                <button onClick={() => handleExport('csv')} className='btn btn-secondary btn-custom'>
+                                    <FaFileDownload className='me-2' /> CSV
+                                </button>
+                                <button onClick={() => handleExport('excel')} className='btn btn-secondary btn-custom'>
+                                    <FaFileDownload className='me-2' /> Excel
                                 </button>
                             </div>
                         )

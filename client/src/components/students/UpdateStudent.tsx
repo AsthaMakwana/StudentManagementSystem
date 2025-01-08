@@ -220,7 +220,7 @@ function UpdateStudent() {
                         </div>
 
                         <div className="col-12 text-center">
-                            <button className="btn submit-btn w-50 fw-bold py-2" style={{ fontSize: "1.1rem" }}>
+                            <button className="btn submit-btn w-25 fw-bold py-2" style={{ fontSize: "1.1rem" }}>
                                 Update
                             </button>
                         </div>

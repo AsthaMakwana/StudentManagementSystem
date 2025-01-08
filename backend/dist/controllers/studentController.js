@@ -177,19 +177,20 @@ const checkEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 exports.checkEmail = checkEmail;
 const exportStudents = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { format = 'csv', searchQuery, ageFilter } = req.query;
+        const { ageFilter, searchQuery, format = 'csv' } = req.query;
         let query = {};
         if (searchQuery) {
             query = {
                 $or: [
-                    { name: { $regex: searchQuery, $options: "i" } },
-                    { surname: { $regex: searchQuery, $options: "i" } },
-                    { email: { $regex: searchQuery, $options: "i" } }
+                    { name: { $regex: searchQuery, $options: 'i' } },
+                    { surname: { $regex: searchQuery, $options: 'i' } },
+                    { email: { $regex: searchQuery, $options: 'i' } },
                 ]
             };
         }
         if (ageFilter) {
-            const [minAge, maxAge] = ageFilter.split('-');
+            const ageRange = ageFilter;
+            const [minAge, maxAge] = ageRange.split('-');
             if (maxAge) {
                 query.age = { $gte: parseInt(minAge), $lte: parseInt(maxAge) };
             }
@@ -197,39 +198,29 @@ const exportStudents = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 query.age = { $gte: parseInt(minAge) };
             }
         }
-        const students = yield Students_1.default.find(query);
+        const students = yield Students_1.default.find(query).lean();
         if (format === 'excel') {
             const workbook = new exceljs_1.Workbook();
-            const sheet = workbook.addWorksheet('Students');
-            sheet.columns = [
-                { header: 'Name', key: 'name' },
-                { header: 'Surname', key: 'surname' },
-                { header: 'Roll No', key: 'rollno' },
-                { header: 'Age', key: 'age' },
-                { header: 'Birthdate', key: 'birthdate' },
-                { header: 'Email', key: 'email' },
-                { header: 'Address', key: 'address' },
+            const worksheet = workbook.addWorksheet('Students');
+            worksheet.columns = [
+                { header: 'Name', key: 'name', width: 20 },
+                { header: 'Surname', key: 'surname', width: 20 },
+                { header: 'Age', key: 'age', width: 10 },
+                { header: 'Email', key: 'email', width: 30 },
+                { header: 'Address', key: 'address', width: 40 },
+                { header: 'Roll No', key: 'rollno', width: 10 },
             ];
-            sheet.addRows(students.map(student => ({
-                name: student.name,
-                surname: student.surname,
-                rollno: student.rollno,
-                age: student.age,
-                birthdate: student.birthdate,
-                email: student.email,
-                address: student.address,
-            })));
+            worksheet.addRows(students);
             res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            res.setHeader('Content-Disposition', 'attachment; filename="students.xlsx"');
+            res.setHeader('Content-Disposition', 'attachment; filename=students.xlsx');
             yield workbook.xlsx.write(res);
             res.end();
         }
         else if (format === 'csv') {
-            const fields = ['name', 'surname', 'rollno', 'age', 'birthdate', 'email', 'address'];
-            const parser = new json2csv_1.Parser({ fields });
+            const parser = new json2csv_1.Parser();
             const csv = parser.parse(students);
             res.setHeader('Content-Type', 'text/csv');
-            res.setHeader('Content-Disposition', 'attachment; filename="students.csv"');
+            res.setHeader('Content-Disposition', 'attachment; filename=students.csv');
             res.send(csv);
         }
         else {
