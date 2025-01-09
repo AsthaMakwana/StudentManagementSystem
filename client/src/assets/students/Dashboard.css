@@ -1,27 +1,71 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Ensure consistent sizing */
+}
+
+html, body {
+    height: 100%; /* Allow full height usage */
+    overflow: hidden; /* Prevent both vertical and horizontal scrollbars */
+}
+
 .dashboard-container {
+    background-color: #f4f6f9;
     padding: 20px;
+    color: #333;
+    height: 100%; /* Use full height of the viewport */
+    display: flex;
+    flex-direction: column; /* Ensure vertical stacking */
 }
 
 .dashboard-header {
-    text-align: center;
-    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 15px; /* Slightly reduced margin */
 }
 
-.total-students,
-.common-age-group {
-    margin-bottom: 10px;
+.stats-card {
+    flex: 1;
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.stats-card h2 {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.stats-card p {
+    font-size: 22px;
+    color: #2a9d8f;
+    font-weight: bold;
 }
 
 .dashboard-content {
     display: flex;
     justify-content: center;
-    flex-direction: column;
     align-items: center;
+    /* flex-grow: 1; */
 }
 
-.age-distribution {
-    width: 60%;
-    max-width: 600px;
-    margin-top: 20px;
+.chart-card {
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 60%; /* Reduced width */
+    max-width: 600px; /* Ensure it doesn’t grow too large */
     text-align: center;
+    overflow: hidden; /* Prevent internal overflow */
+}
+
+.chart-card h3 {
+    font-size: 18px;
+    color: #264653;
+    margin-bottom: 10px;
 }

@@ -28,7 +28,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage }).single('profilePicture');
 
-
 export const createStudent = async (req: Request, res: Response): Promise<void> => {
     try {
         const { error } = studentSchema.validate({ ...req.body });
@@ -61,7 +60,6 @@ export const createStudent = async (req: Request, res: Response): Promise<void> 
         res.status(500).json({ message: "Error creating student", error: err });
     }
 };
-
 
 export const getStudents = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -104,14 +102,12 @@ export const getStudents = async (req: Request, res: Response): Promise<void> =>
     }
 };
 
-
 export const getStudentById = (req: Request, res: Response): void => {
     const id = req.params.id;
     StudentModel.findById({ _id: id })
         .then(student => res.json(student))
         .catch(err => res.status(500).json({ message: 'Error fetching student', error: err }));
 };
-
 
 export const updateStudent = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -143,14 +139,12 @@ export const updateStudent = async (req: Request, res: Response): Promise<void> 
     }
 };
 
-
 export const deleteStudent = (req: Request, res: Response): void => {
     const id = req.params.id;
     StudentModel.findByIdAndDelete({ _id: id })
         .then(result => res.json({ success: true, result }))
         .catch(err => res.status(500).json({ message: 'Error deleting student', error: err }));
 };
-
 
 export const checkEmail = async (req: Request, res: Response): Promise<void> => {
     const { email, studentId } = req.body;
@@ -178,11 +172,11 @@ export const checkEmail = async (req: Request, res: Response): Promise<void> => 
     }
 };
 
-
 export const exportStudents = async (req: Request, res: Response): Promise<void> => {
     try {
         const { ageFilter, searchQuery, format = 'csv' } = req.query;
         let query: any = {};
+
         if (searchQuery) {
             query = {
                 $or: [
@@ -192,6 +186,7 @@ export const exportStudents = async (req: Request, res: Response): Promise<void>
                 ]
             };
         }
+
         if (ageFilter) {
             const ageRange = ageFilter as string;
             const [minAge, maxAge] = ageRange.split('-');
@@ -202,6 +197,7 @@ export const exportStudents = async (req: Request, res: Response): Promise<void>
                 query.age = { $gte: parseInt(minAge) };
             }
         }
+
         const students = await StudentModel.find(query).lean();
         if (format === 'excel') {
             const workbook = new Workbook();

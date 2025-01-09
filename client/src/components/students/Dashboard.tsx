@@ -87,18 +87,18 @@ const Dashboard: React.FC = observer(() => {
     return (
         <div className="dashboard-container">
             <ToastContainer />
-
             <div className="dashboard-header">
-                <div className="total-students">
-                    <h2>Total Students: {totalStudents}</h2>
+                <div className="stats-card">
+                    <h2>Total Students</h2>
+                    <p>{totalStudents}</p>
                 </div>
-                <div className="common-age-group">
-                    <h3>Most Common Age Group: {commonAgeGroup}</h3>
+                <div className="stats-card">
+                    <h2>Most Common Age Group</h2>
+                    <p>{commonAgeGroup}</p>
                 </div>
             </div>
-
             <div className="dashboard-content">
-                <div className="age-distribution">
+                <div className="chart-card">
                     <h3>Age Distribution</h3>
                     <Pie data={ageDistributionData} />
                 </div>
