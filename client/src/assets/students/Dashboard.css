@@ -1,28 +1,28 @@
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box; /* Ensure consistent sizing */
+    box-sizing: border-box;
 }
 
 html, body {
-    height: 100%; /* Allow full height usage */
-    overflow: hidden; /* Prevent both vertical and horizontal scrollbars */
+    height: 100%;
+    overflow: hidden;
 }
 
 .dashboard-container {
     background-color: #f4f6f9;
     padding: 20px;
     color: #333;
-    height: 100%; /* Use full height of the viewport */
+    height: 100%;
     display: flex;
-    flex-direction: column; /* Ensure vertical stacking */
+    flex-direction: column;
 }
 
 .dashboard-header {
     display: flex;
     justify-content: space-between;
     gap: 15px;
-    margin-bottom: 15px; /* Slightly reduced margin */
+    margin-bottom: 15px;
 }
 
 .stats-card {
@@ -58,10 +58,10 @@ html, body {
     padding: 15px;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 60%; /* Reduced width */
-    max-width: 600px; /* Ensure it doesn’t grow too large */
+    width: 60%;
+    max-width: 600px;
     text-align: center;
-    overflow: hidden; /* Prevent internal overflow */
+    overflow: hidden;
 }
 
 .chart-card h3 {

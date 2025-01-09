@@ -83,6 +83,7 @@ const Dashboard: React.FC = observer(() => {
             },
         ],
     };
+    const chartOptions = {animation: false};
 
     return (
         <div className="dashboard-container">
@@ -100,7 +101,7 @@ const Dashboard: React.FC = observer(() => {
             <div className="dashboard-content">
                 <div className="chart-card">
                     <h3>Age Distribution</h3>
-                    <Pie data={ageDistributionData} />
+                    <Pie data={ageDistributionData} options={chartOptions} />
                 </div>
             </div>
         </div>
