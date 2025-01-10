@@ -7,16 +7,22 @@ import multer from 'multer';
 import path from 'path';
 import Joi from 'joi';
 
+
 const studentSchema = Joi.object({
     name: Joi.string().min(3).max(30).required(),
     surname: Joi.string().min(3).max(30).required(),
     birthdate: Joi.date().required(),
-    rollno: Joi.number().integer().min(1).required(),
+    rollno: Joi.number().integer().min(1).required().messages({
+        "number.base": `"rollno" must be a valid number`,
+        "number.empty": `"rollno" cannot be empty`,
+        "any.required": `"rollno" is a required field`,
+    }),
     address: Joi.string().min(5).required(),
     email: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)).required(),
     age: Joi.number().integer().min(1).required(),
     profilePicture: Joi.string().uri().optional(),
 });
+
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -27,6 +33,25 @@ const storage = multer.diskStorage({
     }
 });
 const upload = multer({ storage: storage }).single('profilePicture');
+
+
+const excelUpload = multer({
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => {
+            cb(null, 'uploads/');
+        },
+        filename: (req, file, cb) => {
+            cb(null, `${Date.now()}-${file.originalname}`);
+        }
+    }),
+    fileFilter: (req, file, cb) => {
+        if (!file.originalname.match(/\.(xlsx|xls)$/)) {
+            return cb(new Error('Please upload an excel file'));
+        }
+        cb(null, true);
+    }
+}).single('excelFile');
+
 
 export const createStudent = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -232,3 +257,90 @@ export const exportStudents = async (req: Request, res: Response): Promise<void>
         res.status(500).json({ message: 'Error exporting data', error });
     }
 };
+
+export const importStudents = async (req: Request, res: Response): Promise<void> => {
+    excelUpload(req, res, async (err) => {
+        if (err) {
+            res.status(400).json({ message: err.message });
+            return;
+        }
+        try {
+            const filePath = req.file?.path;
+            if (!filePath) {
+                res.status(400).json({ message: "File not found" });
+                return;
+            }
+            const workbook = new Workbook();
+            await workbook.xlsx.readFile(filePath);
+            const worksheet = workbook.worksheets[0];
+
+            const students: any[] = [];
+            const errors: string[] = [];
+            const existingEmails: Set<string> = new Set();
+
+            worksheet.eachRow((row, rowIndex) => {
+                if (rowIndex === 1) return;
+                const rollnoValue = row.getCell(4).value?.toString() || '';
+                const rollno = parseInt(rollnoValue, 10);
+
+                const emailValue = row.getCell(6).value;
+                let email = '';
+                if (emailValue) {
+                    if (typeof emailValue === 'object' && 'text' in emailValue) {
+                        email = emailValue.text;
+                    } else {
+                        email = emailValue.toString() || '';
+                    }
+                }
+                if (existingEmails.has(email)) {
+                    errors.push(`Duplicate email found in row ${rowIndex}: ${email}`);
+                    return;
+                }
+                existingEmails.add(email);
+
+                const student = {
+                    name: row.getCell(1).value?.toString() || '',
+                    surname: row.getCell(2).value?.toString() || '',
+                    birthdate: row.getCell(3).value?.toString() || '',
+                    rollno: isNaN(rollno) ? null : rollno,
+                    address: row.getCell(5).value?.toString() || '',
+                    email: email,
+                    age: parseInt(row.getCell(7).value?.toString() || '0', 10),
+                };
+
+                const { error } = studentSchema.validate(student);
+                if (error) {
+                    errors.push(`Error in row ${rowIndex} (rollno: ${row.getCell(4).value}): ${error.details[0].message}`);
+                }
+                else {
+                    students.push(student);
+                }
+            });
+
+            if (errors.length > 0) {
+                res.status(400).json({ message: "Validation errors in file", errors });
+                return;
+            }
+
+            for (let student of students) {
+                const existingStudent = await StudentModel.findOne({ email: student.email });
+                if (existingStudent) {
+                    errors.push(`Student with email ${student.email} already exists.`);
+                }
+            }
+
+            if (errors.length > 0) {
+                res.status(400).json({ message: "Duplicate students found", errors });
+                return;
+            }
+
+            await StudentModel.insertMany(students);
+            res.status(201).json({ message: "Students imported successfully", students });
+        }
+        catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error importing students", error });
+        }
+    });
+};
+

@@ -37,6 +37,14 @@ const Students: React.FC = observer(() => {
     const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const { students, totalPages, loading, setStudents, deleteStudent } = studentStore;
+    const [excelFile, setExcelFile] = useState<File | null>(null);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            setExcelFile(e.target.files[0]);
+        }
+    };
+
     const user: User | null = authStore.user;
 
     useEffect(() => {
@@ -148,6 +156,31 @@ const Students: React.FC = observer(() => {
         await studentStore.exportStudents(format, searchQuery, ageFilter, token);
     };
 
+    const handleImport = async () => {
+        if (!excelFile) {
+            alert('Please select an Excel file');
+            return;
+        }
+        try {
+            const token = localStorage.getItem('authToken') || '';
+            const response = await studentStore.uploadExcel(excelFile, token);
+            console.log('Backend Response:', response.response.data.message);
+            if (response?.status !== 200) {
+                toast.error(response.response.data.message);
+            } else {
+                toast.success('Students imported successfully!');
+            }
+        }
+        catch (error: any) {
+            console.error(error);
+            if (error.response?.data?.errors) {
+                toast.error(`Failed to import students:\n${error.response.data.errors.join('\n')}`);
+            } else {
+                alert('Failed to import students');
+            }
+        }
+    };
+
     return (
         <div>
             <div className="logout-button"></div>
@@ -170,6 +203,8 @@ const Students: React.FC = observer(() => {
                                 <button onClick={() => handleExport('excel')} className='btn btn-secondary btn-custom'>
                                     <FaFileDownload className='me-2' /> Excel
                                 </button>
+                                <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} />
+                                <button onClick={handleImport}>Import Students</button>
                             </div>
                         )
                     ) : (

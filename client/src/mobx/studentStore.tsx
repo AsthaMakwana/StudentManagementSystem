@@ -29,6 +29,7 @@ interface IStudentStore {
     deleteStudent(id: string, token: string): Promise<void>;
     getStudentById(id: string, token: string): Promise<void>;
     exportStudents(format: 'csv' | 'excel', searchQuery: string, ageFilter: string, token: string): Promise<void>;
+    uploadExcel(file: File, token: String): Promise<{ data: { errors: string[] }; message: string } | Error>;
 }
 
 class StudentStore implements IStudentStore {
@@ -149,9 +150,29 @@ class StudentStore implements IStudentStore {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        } 
-         catch (error) {
+        }
+        catch (error) {
             console.error('Error exporting data:', error);
+        }
+    };
+
+    uploadExcel = async (file: File, token: string): Promise<{ status: number; data: { errors: string[] }; message: string } | any> => {
+        console.log('File', file);
+        console.log('Token', token);
+        const formData = new FormData();
+        formData.append('excelFile', file);
+        try {
+            const response = await axios.post(`${API_BASE_URL}/import-students`, formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            console.log('Import successful:', response.data);
+            return response.data;
+        } catch (error: any) {
+            console.error('Error importing students:', error);
+            return error;
         }
     };
 }

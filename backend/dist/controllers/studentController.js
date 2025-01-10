@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.exportStudents = exports.checkEmail = exports.deleteStudent = exports.updateStudent = exports.getStudentById = exports.getStudents = exports.createStudent = void 0;
+exports.importStudents = exports.exportStudents = exports.checkEmail = exports.deleteStudent = exports.updateStudent = exports.getStudentById = exports.getStudents = exports.createStudent = void 0;
 const Students_1 = __importDefault(require("../models/Students"));
 const exceljs_1 = require("exceljs");
 const json2csv_1 = require("json2csv");
@@ -23,7 +23,12 @@ const studentSchema = joi_1.default.object({
     name: joi_1.default.string().min(3).max(30).required(),
     surname: joi_1.default.string().min(3).max(30).required(),
     birthdate: joi_1.default.date().required(),
-    rollno: joi_1.default.number().integer().min(1).required(),
+    // rollno: Joi.number().integer().min(1).required(),
+    rollno: joi_1.default.number().integer().min(1).required().messages({
+        "number.base": `"rollno" must be a valid number`,
+        "number.empty": `"rollno" cannot be empty`,
+        "any.required": `"rollno" is a required field`,
+    }),
     address: joi_1.default.string().min(5).required(),
     email: joi_1.default.string().pattern(new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)).required(),
     age: joi_1.default.number().integer().min(1).required(),
@@ -38,6 +43,23 @@ const storage = multer_1.default.diskStorage({
     }
 });
 const upload = (0, multer_1.default)({ storage: storage }).single('profilePicture');
+//import
+const excelUpload = (0, multer_1.default)({
+    storage: multer_1.default.diskStorage({
+        destination: (req, file, cb) => {
+            cb(null, 'uploads/');
+        },
+        filename: (req, file, cb) => {
+            cb(null, `${Date.now()}-${file.originalname}`);
+        }
+    }),
+    fileFilter: (req, file, cb) => {
+        if (!file.originalname.match(/\.(xlsx|xls)$/)) {
+            return cb(new Error('Please upload an excel file'));
+        }
+        cb(null, true);
+    }
+}).single('excelFile');
 const createStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { error } = studentSchema.validate(Object.assign({}, req.body));
@@ -233,3 +255,87 @@ const exportStudents = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.exportStudents = exportStudents;
+//import
+const importStudents = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    excelUpload(req, res, (err) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        if (err) {
+            res.status(400).json({ message: err.message });
+            return;
+        }
+        try {
+            const filePath = (_a = req.file) === null || _a === void 0 ? void 0 : _a.path;
+            if (!filePath) {
+                res.status(400).json({ message: "File not found" });
+                return;
+            }
+            const workbook = new exceljs_1.Workbook();
+            yield workbook.xlsx.readFile(filePath);
+            const worksheet = workbook.worksheets[0];
+            const students = [];
+            const errors = [];
+            const existingEmails = new Set();
+            worksheet.eachRow((row, rowIndex) => {
+                var _a, _b, _c, _d, _e, _f;
+                if (rowIndex === 1)
+                    return; // Skip header row
+                const rollnoValue = ((_a = row.getCell(4).value) === null || _a === void 0 ? void 0 : _a.toString()) || '';
+                const rollno = parseInt(rollnoValue, 10);
+                const emailValue = row.getCell(6).value;
+                let email = '';
+                if (emailValue) {
+                    if (typeof emailValue === 'object' && 'text' in emailValue) {
+                        email = emailValue.text;
+                    }
+                    else {
+                        email = emailValue.toString() || '';
+                    }
+                }
+                if (existingEmails.has(email)) {
+                    errors.push(`Duplicate email found in row ${rowIndex}: ${email}`);
+                    return;
+                }
+                existingEmails.add(email);
+                const student = {
+                    name: ((_b = row.getCell(1).value) === null || _b === void 0 ? void 0 : _b.toString()) || '',
+                    surname: ((_c = row.getCell(2).value) === null || _c === void 0 ? void 0 : _c.toString()) || '',
+                    birthdate: ((_d = row.getCell(3).value) === null || _d === void 0 ? void 0 : _d.toString()) || '',
+                    rollno: isNaN(rollno) ? null : rollno,
+                    address: ((_e = row.getCell(5).value) === null || _e === void 0 ? void 0 : _e.toString()) || '',
+                    email: email,
+                    age: parseInt(((_f = row.getCell(7).value) === null || _f === void 0 ? void 0 : _f.toString()) || '0', 10),
+                };
+                const { error } = studentSchema.validate(student);
+                if (error) {
+                    errors.push(`Error in row ${rowIndex} (rollno: ${row.getCell(4).value}): ${error.details[0].message}`);
+                }
+                else {
+                    students.push(student);
+                }
+            });
+            if (errors.length > 0) {
+                res.status(400).json({ message: "Validation errors in file", errors });
+                return;
+            }
+            // Check for duplicate emails before insertion
+            for (let student of students) {
+                const existingStudent = yield Students_1.default.findOne({ email: student.email });
+                if (existingStudent) {
+                    errors.push(`Student with email ${student.email} already exists.`);
+                }
+            }
+            if (errors.length > 0) {
+                res.status(400).json({ message: "Duplicate students found", errors });
+                return;
+            }
+            // Proceed with inserting non-duplicate students
+            yield Students_1.default.insertMany(students);
+            res.status(201).json({ message: "Students imported successfully", students });
+        }
+        catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error importing students", error });
+        }
+    }));
+});
+exports.importStudents = importStudents;
