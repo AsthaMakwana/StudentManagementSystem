@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaEdit, FaFileDownload, FaPlus, FaTrash } from 'react-icons/fa';
 import StudentDetailsModal from './StudentDetailsModal';
 import { toast, ToastContainer } from 'react-toastify';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import studentStore from '../../mobx/studentStore';
 import 'react-toastify/dist/ReactToastify.css';
 import authStore from '../../mobx/authStore';
@@ -38,6 +38,8 @@ const Students: React.FC = observer(() => {
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const { students, totalPages, loading, setStudents, deleteStudent } = studentStore;
     const [excelFile, setExcelFile] = useState<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -164,11 +166,19 @@ const Students: React.FC = observer(() => {
         try {
             const token = localStorage.getItem('authToken') || '';
             const response = await studentStore.uploadExcel(excelFile, token);
-            console.log('Backend Response:', response.response.data.message);
-            if (response?.status !== 200) {
+            if (response?.status === 400) {
                 toast.error(response.response.data.message);
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+                setExcelFile(null);
             } else {
                 toast.success('Students imported successfully!');
+                setStudents(currentPage, studentsPerPage, token, searchQuery, ageFilter);
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+                setExcelFile(null);
             }
         }
         catch (error: any) {
@@ -184,27 +194,29 @@ const Students: React.FC = observer(() => {
     return (
         <div>
             <div className="logout-button"></div>
+            <div className='p-2 d-flex gap-2 justify-content-end'>
+                <button onClick={() => handleExport('csv')} className='btn btn-secondary btn-custom'>
+                    <FaFileDownload className='me-2' /> CSV
+                </button>
+                <button onClick={() => handleExport('excel')} className='btn btn-secondary btn-custom'>
+                    <FaFileDownload className='me-2' /> Excel
+                </button>
+            </div>
             <div className="table-container bg-white shadow rounded p-4">
                 <ToastContainer />
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1 className="text-center mb-0">Students</h1>
                     {user ? (
                         user.role === 'admin' && (
-                            <div className="d-flex gap-2">
+                            <div className="d-flex gap-2 align-items-center">
                                 <Link to="/create" state={{ fromPage: currentPage }} className="btn btn-primary btn-custom">
                                     <FaPlus className="me-2" /> Add Student
                                 </Link>
                                 <button className="btn btn-danger btn-custom" onClick={handleBulkDelete}>
                                     <FaTrash className="me-2" /> Delete Selected
                                 </button>
-                                <button onClick={() => handleExport('csv')} className='btn btn-secondary btn-custom'>
-                                    <FaFileDownload className='me-2' /> CSV
-                                </button>
-                                <button onClick={() => handleExport('excel')} className='btn btn-secondary btn-custom'>
-                                    <FaFileDownload className='me-2' /> Excel
-                                </button>
-                                <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} />
-                                <button onClick={handleImport}>Import Students</button>
+                                <button onClick={handleImport} className='btn btn-success btn-custom'>Import Students</button>
+                                <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} className="form-control-file" ref={fileInputRef} />
                             </div>
                         )
                     ) : (

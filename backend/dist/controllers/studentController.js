@@ -23,7 +23,6 @@ const studentSchema = joi_1.default.object({
     name: joi_1.default.string().min(3).max(30).required(),
     surname: joi_1.default.string().min(3).max(30).required(),
     birthdate: joi_1.default.date().required(),
-    // rollno: Joi.number().integer().min(1).required(),
     rollno: joi_1.default.number().integer().min(1).required().messages({
         "number.base": `"rollno" must be a valid number`,
         "number.empty": `"rollno" cannot be empty`,
@@ -43,7 +42,6 @@ const storage = multer_1.default.diskStorage({
     }
 });
 const upload = (0, multer_1.default)({ storage: storage }).single('profilePicture');
-//import
 const excelUpload = (0, multer_1.default)({
     storage: multer_1.default.diskStorage({
         destination: (req, file, cb) => {
@@ -255,7 +253,6 @@ const exportStudents = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.exportStudents = exportStudents;
-//import
 const importStudents = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     excelUpload(req, res, (err) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
@@ -278,7 +275,7 @@ const importStudents = (req, res) => __awaiter(void 0, void 0, void 0, function*
             worksheet.eachRow((row, rowIndex) => {
                 var _a, _b, _c, _d, _e, _f;
                 if (rowIndex === 1)
-                    return; // Skip header row
+                    return;
                 const rollnoValue = ((_a = row.getCell(4).value) === null || _a === void 0 ? void 0 : _a.toString()) || '';
                 const rollno = parseInt(rollnoValue, 10);
                 const emailValue = row.getCell(6).value;
@@ -317,7 +314,6 @@ const importStudents = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 res.status(400).json({ message: "Validation errors in file", errors });
                 return;
             }
-            // Check for duplicate emails before insertion
             for (let student of students) {
                 const existingStudent = yield Students_1.default.findOne({ email: student.email });
                 if (existingStudent) {
@@ -328,7 +324,6 @@ const importStudents = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 res.status(400).json({ message: "Duplicate students found", errors });
                 return;
             }
-            // Proceed with inserting non-duplicate students
             yield Students_1.default.insertMany(students);
             res.status(201).json({ message: "Students imported successfully", students });
         }
