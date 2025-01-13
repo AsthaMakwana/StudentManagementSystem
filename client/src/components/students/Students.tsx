@@ -38,7 +38,7 @@ const Students: React.FC = observer(() => {
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const { students, totalPages, loading, setStudents, deleteStudent } = studentStore;
     const [excelFile, setExcelFile] = useState<File | null>(null);
-    // const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,16 +170,16 @@ const Students: React.FC = observer(() => {
             const response = await studentStore.uploadExcel(excelFile, token);
             if (response?.status === 400) {
                 toast.error(response.response.data.message);
-                // if (fileInputRef.current) {
-                //     fileInputRef.current.value = '';
-                // }
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
                 setExcelFile(null);
             } else {
                 toast.success('Students imported successfully!');
                 setStudents(currentPage, studentsPerPage, token, searchQuery, ageFilter);
-                // if (fileInputRef.current) {
-                //     fileInputRef.current.value = '';
-                // }
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
                 setExcelFile(null);
             }
         }
@@ -218,7 +218,7 @@ const Students: React.FC = observer(() => {
                                     <FaTrash className="me-2" /> Delete Selected
                                 </button>
                                 <button onClick={handleImport} className='btn btn-success btn-custom'>Import Students</button>
-                                <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} className="form-control-file"/>
+                                <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} className="form-control-file" ref={fileInputRef} />
                             </div>
                         )
                     ) : (

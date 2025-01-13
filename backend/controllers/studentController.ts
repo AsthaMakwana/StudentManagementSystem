@@ -22,7 +22,9 @@ const studentSchema = Joi.object({
     address: Joi.string().min(5).required(),
     email: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)).required(),
     age: Joi.number().integer().min(1).required(),
-    profilePicture: Joi.string().uri().optional(),
+    profilePicture: Joi.string()
+        .pattern(new RegExp('^\\/uploads\\/[a-zA-Z0-9._-]+\\.(jpg|jpeg|png|gif)$'))
+        .optional(),
 });
 
 
@@ -40,7 +42,7 @@ const upload = multer({ storage: storage }).single('profilePicture');
 const excelUpload = multer({
     storage: multer.diskStorage({
         destination: (req, file, cb) => {
-            cb(null, 'uploads/');
+            cb(null, 'uploads/excel_files');
         },
         filename: (req, file, cb) => {
             cb(null, `${Date.now()}-${file.originalname}`);
@@ -299,19 +301,22 @@ export const importStudents = async (req: Request, res: Response): Promise<void>
                     return;
                 }
                 existingEmails.add(email);
-                // let profilePicture = row.getCell(8).value?.toString() || '';
-                // if (profilePicture) {
-                //     const imagePath = join('uploads', path.basename(profilePicture));
-                //     if (fs.existsSync(profilePicture)) {
-                //         // Move the image file to the 'uploads' directory
-                //         fs.renameSync(profilePicture, imagePath);
-                //         profilePicture = `/${imagePath}`;
-                //     } else {
-                //         errors.push(`Image file not found for student in row ${rowIndex}: ${profilePicture}`);
-                //     }
-                    
-                    
-                // }
+                let profilePicture = row.getCell(8).value?.toString() || '';
+                if (profilePicture) {
+                    const sourcePath = path.resolve(profilePicture);
+                    if (fs.existsSync(sourcePath)) {
+                        const destDir = path.join(__dirname, '..', '..', 'uploads', 'profile-pictures');
+                        if (!fs.existsSync(destDir)) {
+                            fs.mkdirSync(destDir, { recursive: true });
+                        }
+                        const destPath = path.join(destDir, path.basename(sourcePath));
+                        fs.copyFileSync(sourcePath, destPath);
+                        profilePicture = `/uploads/${path.basename(sourcePath)}`;
+                    } else {
+                        errors.push(`Image file not found for student in row ${rowIndex}: ${profilePicture}`);
+                        profilePicture = '';
+                    }
+                }
                 // console.log("picture", profilePicture)
 
                 const student = {
@@ -322,7 +327,7 @@ export const importStudents = async (req: Request, res: Response): Promise<void>
                     address: row.getCell(5).value?.toString() || '',
                     email: email,
                     age: parseInt(row.getCell(7).value?.toString() || '0', 10),
-                    // profilePicture: profilePicture,
+                    profilePicture,
                 };
 
                 const { error } = studentSchema.validate(student);

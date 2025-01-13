@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -19,6 +52,7 @@ const json2csv_1 = require("json2csv");
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
 const joi_1 = __importDefault(require("joi"));
+const fs = __importStar(require("fs"));
 const studentSchema = joi_1.default.object({
     name: joi_1.default.string().min(3).max(30).required(),
     surname: joi_1.default.string().min(3).max(30).required(),
@@ -31,7 +65,9 @@ const studentSchema = joi_1.default.object({
     address: joi_1.default.string().min(5).required(),
     email: joi_1.default.string().pattern(new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)).required(),
     age: joi_1.default.number().integer().min(1).required(),
-    profilePicture: joi_1.default.string().uri().optional(),
+    profilePicture: joi_1.default.string()
+        .pattern(new RegExp('^\\/uploads\\/[a-zA-Z0-9._-]+\\.(jpg|jpeg|png|gif)$'))
+        .optional(),
 });
 const storage = multer_1.default.diskStorage({
     destination: function (req, file, cb) {
@@ -273,7 +309,7 @@ const importStudents = (req, res) => __awaiter(void 0, void 0, void 0, function*
             const errors = [];
             const existingEmails = new Set();
             worksheet.eachRow((row, rowIndex) => {
-                var _a, _b, _c, _d, _e, _f;
+                var _a, _b, _c, _d, _e, _f, _g;
                 if (rowIndex === 1)
                     return;
                 const rollnoValue = ((_a = row.getCell(4).value) === null || _a === void 0 ? void 0 : _a.toString()) || '';
@@ -293,27 +329,33 @@ const importStudents = (req, res) => __awaiter(void 0, void 0, void 0, function*
                     return;
                 }
                 existingEmails.add(email);
-                // let profilePicture = row.getCell(8).value?.toString() || '';
-                // if (profilePicture) {
-                //     const imagePath = join('uploads', path.basename(profilePicture));
-                //     if (fs.existsSync(profilePicture)) {
-                //         // Move the image file to the 'uploads' directory
-                //         fs.renameSync(profilePicture, imagePath);
-                //         profilePicture = `/${imagePath}`;
-                //     } else {
-                //         errors.push(`Image file not found for student in row ${rowIndex}: ${profilePicture}`);
-                //     }
-                // }
+                let profilePicture = ((_b = row.getCell(8).value) === null || _b === void 0 ? void 0 : _b.toString()) || '';
+                if (profilePicture) {
+                    const sourcePath = path_1.default.resolve(profilePicture);
+                    if (fs.existsSync(sourcePath)) {
+                        const destDir = path_1.default.join(__dirname, '..', '..', 'uploads', 'profile-pictures');
+                        if (!fs.existsSync(destDir)) {
+                            fs.mkdirSync(destDir, { recursive: true });
+                        }
+                        const destPath = path_1.default.join(destDir, path_1.default.basename(sourcePath));
+                        fs.copyFileSync(sourcePath, destPath);
+                        profilePicture = `/uploads/profile-pictures/${path_1.default.basename(sourcePath)}`;
+                    }
+                    else {
+                        errors.push(`Image file not found for student in row ${rowIndex}: ${profilePicture}`);
+                        profilePicture = '';
+                    }
+                }
                 // console.log("picture", profilePicture)
                 const student = {
-                    name: ((_b = row.getCell(1).value) === null || _b === void 0 ? void 0 : _b.toString()) || '',
-                    surname: ((_c = row.getCell(2).value) === null || _c === void 0 ? void 0 : _c.toString()) || '',
-                    birthdate: ((_d = row.getCell(3).value) === null || _d === void 0 ? void 0 : _d.toString()) || '',
+                    name: ((_c = row.getCell(1).value) === null || _c === void 0 ? void 0 : _c.toString()) || '',
+                    surname: ((_d = row.getCell(2).value) === null || _d === void 0 ? void 0 : _d.toString()) || '',
+                    birthdate: ((_e = row.getCell(3).value) === null || _e === void 0 ? void 0 : _e.toString()) || '',
                     rollno: isNaN(rollno) ? null : rollno,
-                    address: ((_e = row.getCell(5).value) === null || _e === void 0 ? void 0 : _e.toString()) || '',
+                    address: ((_f = row.getCell(5).value) === null || _f === void 0 ? void 0 : _f.toString()) || '',
                     email: email,
-                    age: parseInt(((_f = row.getCell(7).value) === null || _f === void 0 ? void 0 : _f.toString()) || '0', 10),
-                    // profilePicture: profilePicture,
+                    age: parseInt(((_g = row.getCell(7).value) === null || _g === void 0 ? void 0 : _g.toString()) || '0', 10),
+                    profilePicture,
                 };
                 const { error } = studentSchema.validate(student);
                 if (error) {
@@ -334,7 +376,7 @@ const importStudents = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 }
             }
             if (errors.length > 0) {
-                res.status(400).json({ message: "Duplicate students ddfound", errors });
+                res.status(400).json({ message: "Duplicate students found", errors });
                 return;
             }
             yield Students_1.default.insertMany(students);
