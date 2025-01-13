@@ -27,6 +27,7 @@
     "ts-node-dev": "^2.0.0"
   },
   "devDependencies": {
-    "@types/json2csv": "^5.0.7"
+    "@types/json2csv": "^5.0.7",
+    "@types/uuid": "^10.0.0"
   }
 }

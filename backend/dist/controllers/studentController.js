@@ -293,6 +293,18 @@ const importStudents = (req, res) => __awaiter(void 0, void 0, void 0, function*
                     return;
                 }
                 existingEmails.add(email);
+                // let profilePicture = row.getCell(8).value?.toString() || '';
+                // if (profilePicture) {
+                //     const imagePath = join('uploads', path.basename(profilePicture));
+                //     if (fs.existsSync(profilePicture)) {
+                //         // Move the image file to the 'uploads' directory
+                //         fs.renameSync(profilePicture, imagePath);
+                //         profilePicture = `/${imagePath}`;
+                //     } else {
+                //         errors.push(`Image file not found for student in row ${rowIndex}: ${profilePicture}`);
+                //     }
+                // }
+                // console.log("picture", profilePicture)
                 const student = {
                     name: ((_b = row.getCell(1).value) === null || _b === void 0 ? void 0 : _b.toString()) || '',
                     surname: ((_c = row.getCell(2).value) === null || _c === void 0 ? void 0 : _c.toString()) || '',
@@ -301,6 +313,7 @@ const importStudents = (req, res) => __awaiter(void 0, void 0, void 0, function*
                     address: ((_e = row.getCell(5).value) === null || _e === void 0 ? void 0 : _e.toString()) || '',
                     email: email,
                     age: parseInt(((_f = row.getCell(7).value) === null || _f === void 0 ? void 0 : _f.toString()) || '0', 10),
+                    // profilePicture: profilePicture,
                 };
                 const { error } = studentSchema.validate(student);
                 if (error) {
@@ -321,7 +334,7 @@ const importStudents = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 }
             }
             if (errors.length > 0) {
-                res.status(400).json({ message: "Duplicate students found", errors });
+                res.status(400).json({ message: "Duplicate students ddfound", errors });
                 return;
             }
             yield Students_1.default.insertMany(students);

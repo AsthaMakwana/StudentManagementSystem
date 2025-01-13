@@ -6,6 +6,8 @@ import { Types } from "mongoose";
 import multer from 'multer';
 import path from 'path';
 import Joi from 'joi';
+import * as fs from 'fs';
+import { join } from 'path';
 
 
 const studentSchema = Joi.object({
@@ -297,6 +299,20 @@ export const importStudents = async (req: Request, res: Response): Promise<void>
                     return;
                 }
                 existingEmails.add(email);
+                // let profilePicture = row.getCell(8).value?.toString() || '';
+                // if (profilePicture) {
+                //     const imagePath = join('uploads', path.basename(profilePicture));
+                //     if (fs.existsSync(profilePicture)) {
+                //         // Move the image file to the 'uploads' directory
+                //         fs.renameSync(profilePicture, imagePath);
+                //         profilePicture = `/${imagePath}`;
+                //     } else {
+                //         errors.push(`Image file not found for student in row ${rowIndex}: ${profilePicture}`);
+                //     }
+                    
+                    
+                // }
+                // console.log("picture", profilePicture)
 
                 const student = {
                     name: row.getCell(1).value?.toString() || '',
@@ -306,6 +322,7 @@ export const importStudents = async (req: Request, res: Response): Promise<void>
                     address: row.getCell(5).value?.toString() || '',
                     email: email,
                     age: parseInt(row.getCell(7).value?.toString() || '0', 10),
+                    // profilePicture: profilePicture,
                 };
 
                 const { error } = studentSchema.validate(student);

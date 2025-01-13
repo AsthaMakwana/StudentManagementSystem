@@ -161,6 +161,8 @@ class StudentStore implements IStudentStore {
         console.log('Token', token);
         const formData = new FormData();
         formData.append('excelFile', file);
+        console.log("formdata", formData);
+        
         try {
             const response = await axios.post(`${API_BASE_URL}/import-students`, formData, {
                 headers: {
