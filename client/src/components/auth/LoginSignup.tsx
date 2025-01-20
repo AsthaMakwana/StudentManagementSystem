@@ -18,9 +18,9 @@ interface ILoginSignupForm {
 const LoginSignup: React.FC = () => {
 
   const [isLoginMode, setIsLoginMode] = useState<boolean>(true);
-  const navigate = useNavigate();
-  const { register, handleSubmit, setError, reset, formState: { errors }, setValue } = useForm<ILoginSignupForm>();
   const [isNavigated, setIsNavigated] = useState<boolean>(false);
+  const { register, handleSubmit, setError, reset, formState: { errors }, setValue } = useForm<ILoginSignupForm>();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const tokenFromStorage = localStorage.getItem('authToken');
@@ -66,7 +66,8 @@ const LoginSignup: React.FC = () => {
       else {
         toast.error(authStore.error?.error || 'Error during login.');
       }
-    } catch (error: any) {
+    }
+    catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Error during login. Please try again later.';
       setError('email', { type: 'manual', message: errorMessage });
       setError('password', { type: 'manual', message: errorMessage });

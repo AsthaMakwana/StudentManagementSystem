@@ -50,9 +50,9 @@ const Students_1 = __importDefault(require("../models/Students"));
 const exceljs_1 = require("exceljs");
 const json2csv_1 = require("json2csv");
 const multer_1 = __importDefault(require("multer"));
+const fs = __importStar(require("fs"));
 const path_1 = __importDefault(require("path"));
 const joi_1 = __importDefault(require("joi"));
-const fs = __importStar(require("fs"));
 const studentSchema = joi_1.default.object({
     name: joi_1.default.string().min(3).max(30).required(),
     surname: joi_1.default.string().min(3).max(30).required(),
@@ -81,7 +81,7 @@ const upload = (0, multer_1.default)({ storage: storage }).single('profilePictur
 const excelUpload = (0, multer_1.default)({
     storage: multer_1.default.diskStorage({
         destination: (req, file, cb) => {
-            cb(null, 'uploads/');
+            cb(null, 'uploads/excel_files');
         },
         filename: (req, file, cb) => {
             cb(null, `${Date.now()}-${file.originalname}`);
@@ -339,14 +339,13 @@ const importStudents = (req, res) => __awaiter(void 0, void 0, void 0, function*
                         }
                         const destPath = path_1.default.join(destDir, path_1.default.basename(sourcePath));
                         fs.copyFileSync(sourcePath, destPath);
-                        profilePicture = `/uploads/profile-pictures/${path_1.default.basename(sourcePath)}`;
+                        profilePicture = `/uploads/${path_1.default.basename(sourcePath)}`;
                     }
                     else {
                         errors.push(`Image file not found for student in row ${rowIndex}: ${profilePicture}`);
                         profilePicture = '';
                     }
                 }
-                // console.log("picture", profilePicture)
                 const student = {
                     name: ((_c = row.getCell(1).value) === null || _c === void 0 ? void 0 : _c.toString()) || '',
                     surname: ((_d = row.getCell(2).value) === null || _d === void 0 ? void 0 : _d.toString()) || '',

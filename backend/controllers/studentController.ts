@@ -4,11 +4,9 @@ import { Workbook } from 'exceljs';
 import { Parser } from 'json2csv';
 import { Types } from "mongoose";
 import multer from 'multer';
+import * as fs from 'fs';
 import path from 'path';
 import Joi from 'joi';
-import * as fs from 'fs';
-import { join } from 'path';
-
 
 const studentSchema = Joi.object({
     name: Joi.string().min(3).max(30).required(),
@@ -26,7 +24,6 @@ const studentSchema = Joi.object({
         .pattern(new RegExp('^\\/uploads\\/[a-zA-Z0-9._-]+\\.(jpg|jpeg|png|gif)$'))
         .optional(),
 });
-
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -317,7 +314,6 @@ export const importStudents = async (req: Request, res: Response): Promise<void>
                         profilePicture = '';
                     }
                 }
-                // console.log("picture", profilePicture)
 
                 const student = {
                     name: row.getCell(1).value?.toString() || '',

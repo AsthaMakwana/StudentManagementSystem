@@ -24,13 +24,12 @@ function UpdateStudent() {
 
     const { id } = useParams<{ id: string }>();
     const location = useLocation();
-    const student = studentStore.student as Student | null;
     const navigate = useNavigate();
-
     const [profilePicture, setProfilePicture] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
     const { register, handleSubmit, setValue, watch, setError, formState: { errors }, } = useForm<Student>();
+
+    const student = studentStore.student as Student | null;
     const birthdate = watch('birthdate');
     const watchedData = watch();
     const initialData = student;

@@ -1,8 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaEdit, FaFileDownload, FaPlus, FaTrash } from 'react-icons/fa';
+import React, { useEffect, useRef, useState } from 'react';
 import StudentDetailsModal from './StudentDetailsModal';
 import { toast, ToastContainer } from 'react-toastify';
-import React, { useEffect, useRef, useState } from 'react';
 import studentStore from '../../mobx/studentStore';
 import 'react-toastify/dist/ReactToastify.css';
 import authStore from '../../mobx/authStore';
@@ -164,8 +164,7 @@ const Students: React.FC = observer(() => {
             return;
         }
         try {
-            console.log("excel", excelFile);
-            
+
             const token = localStorage.getItem('authToken') || '';
             const response = await studentStore.uploadExcel(excelFile, token);
             if (response?.status === 400) {

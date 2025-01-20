@@ -106,6 +106,7 @@ html {
 .btn-danger:hover {
     background-color: #a71d2a;
 }
+
 .export-options button {
     margin: 0 5px;
     padding: 10px 20px;
@@ -115,6 +116,7 @@ html {
     border-radius: 4px;
     cursor: pointer;
 }
+
 .export-options button:hover {
     background-color: #0056b3;
 }

@@ -5,10 +5,10 @@ import { Modal } from "react-bootstrap";
 import React, { useState } from "react";
 
 const Navbar: React.FC = observer(() => {
-    const user = authStore.user;
-    const navigate = useNavigate();
 
+    const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
+    const user = authStore.user;
 
     const handleLogout = (): void => {
         authStore.logout();

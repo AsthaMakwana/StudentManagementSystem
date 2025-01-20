@@ -157,12 +157,9 @@ class StudentStore implements IStudentStore {
     };
 
     uploadExcel = async (file: File, token: string): Promise<{ status: number; data: { errors: string[] }; message: string } | any> => {
-        console.log('File', file);
-        console.log('Token', token);
         const formData = new FormData();
         formData.append('excelFile', file);
-        console.log("formdata", formData);
-        
+
         try {
             const response = await axios.post(`${API_BASE_URL}/import-students`, formData, {
                 headers: {
@@ -172,7 +169,8 @@ class StudentStore implements IStudentStore {
             });
             console.log('Import successful:', response.data);
             return response.data;
-        } catch (error: any) {
+        } 
+        catch (error: any) {
             console.error('Error importing students:', error);
             return error;
         }

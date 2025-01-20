@@ -22,7 +22,6 @@ function CreateStudent() {
 
     const location = useLocation();
     const navigate = useNavigate();
-
     const [profilePicture, setProfilePicture] = useState<File | null>(null);
     const { register, handleSubmit, setValue, watch, formState: { errors }, setError } = useForm<ICreateStudentForm>();
 
@@ -77,7 +76,6 @@ function CreateStudent() {
 
         const token = localStorage.getItem('authToken') || '';
         const formData = new FormData();
-
         Object.entries(data).forEach(([key, value]) => {
             formData.append(key, value);
         });

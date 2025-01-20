@@ -11,6 +11,7 @@ import { Pie } from 'react-chartjs-2';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Dashboard: React.FC = observer(() => {
+
     const { students, loading, setStudents } = studentStore;
     const [totalStudents, setTotalStudents] = useState<number>(0);
     const [commonAgeGroup, setCommonAgeGroup] = useState<string>('');
@@ -83,7 +84,7 @@ const Dashboard: React.FC = observer(() => {
             },
         ],
     };
-    const chartOptions = {animation: false};
+    const chartOptions = { animation: false };
 
     return (
         <div className="dashboard-container">
